@@ -73,11 +73,14 @@ class Construction:
                 
     # def cheapest_insertion(self, current_tour):
     def cheapest_insertion(self, current_tour):
+        # print("cheapest current tour", current_tour)
         # print(len(current_tour))
         # fuck = len(current_tour)
         # current_tour = self.get_tours()[0]
         best_tours, best_lengths = [], []
         # for tour in self.get_tours():
+        if len(current_tour) == 2:
+            return current_tour
         starter = random.choice(current_tour)
         # print(starter)
         tour, tours, tour_lengths = [starter], [], []
@@ -110,7 +113,8 @@ class Construction:
     def tour_length(self, tour):
         tour_length = 0.0
         for i in range(len(tour) - 1):
-            tour_length += self.compute_dist(tour[i], tour[i + 1]) 
+            tour_length += self.compute_dist(tour[i], tour[i + 1])
+        tour_length += self.compute_dist(tour[0], tour[-1]) # because it's a circle
         return tour_length
 
     def pure_truck(self):
@@ -183,6 +187,7 @@ class Construction:
             complete_tours.append(self.complete_tour(ms))
         return  complete_tours
 
+    '''
     def connectors(self):
         connectors = []
         for seqs in self.all_complete_tour():
@@ -192,7 +197,8 @@ class Construction:
                     if cusi in single_tour:
                         connectors.append(cusi)
         return connectors
-            
+    '''
+
     def all_route(self):
         return self.pure_truck(), self.pure_vehicle(), self.all_complete_tour()
         
@@ -204,4 +210,4 @@ if __name__ == "__main__":
     print(c.pure_vehicle(), "\n")
     print(c.all_complete_tour())
     # print(len(c.all_complete_tour()), "\n")
-    print(c.connectors())
+    # print(c.connectors())

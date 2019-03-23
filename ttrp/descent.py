@@ -49,11 +49,11 @@ class Descent(Construction):
         sst_len = len(split_sub_tours)
         a_tour = tr + pv + main_tours
         b_tour = tr + pv + main_tours + split_sub_tours
-        print("b_tour of opd1:", b_tour)
+        # print("b_tour of opd1:", b_tour)
         
         for route_r in a_tour:
             for cus in route_r:
-                if cus in self.connectors() or cus == 'a':
+                if cus in self.connectors(main_tours, split_sub_tours) or cus == 'a':
                     continue
                 penalty_r = max((self.penalty(route_r, tr, pv, main_tours, split_sub_tours) -
                                  self.one.get_demands()[cus]), 0)
@@ -103,14 +103,14 @@ class Descent(Construction):
     # sub tours is examined then
     def opd2(self, tr, pv, main_tours, split_sub_tours):
         b_tour = tr + pv + main_tours + split_sub_tours
-        print("b_tour of opd2:", b_tour)
+        # print("b_tour of opd2:", b_tour)
         tr_len = len(tr)
         pv_len = len(pv)
         mt_len = len(main_tours)
         sst_len = len(split_sub_tours)
         for route_r in split_sub_tours:
             for cus in route_r:
-                if cus in self.connectors() or cus == 'a':
+                if cus in self.connectors(main_tours, split_sub_tours) or cus == 'a':
                     continue
                 penalty_r = max((self.penalty(route_r, tr, pv, main_tours, split_sub_tours) -
                                  self.one.get_demands()[cus]), 0)
@@ -160,7 +160,7 @@ class Descent(Construction):
     
     def tpd(self, tr, pv, main_tours, split_sub_tours):
         b_tour = tr + pv + main_tours + split_sub_tours
-        print("b_tour of tpd:", b_tour)
+        # print("b_tour of tpd:", b_tour)
         tr_len = len(tr)
         pv_len = len(pv)
         mt_len = len(main_tours)
@@ -168,7 +168,7 @@ class Descent(Construction):
 
         for route_r in b_tour:
             for cusi in route_r:
-                if cusi in self.connectors() or cusi == 'a':
+                if cusi in self.connectors(main_tours, split_sub_tours) or cusi == 'a':
                     continue
                 for route_s in b_tour:
                     if route_s == route_r:
@@ -176,7 +176,7 @@ class Descent(Construction):
                     elif (self.one.get_types()[cusi] == 1) & (route_s in (pv or main_tours)):
                         continue
                     for cusj in route_s:
-                        if cusj in self.connectors() or cusj == 'a':
+                        if cusj in self.connectors(main_tours, split_sub_tours) or cusj == 'a':
                             continue
                         elif (self.one.get_types()[cusj] == 1) & (route_s in (pv or main_tours)):
                             continue
@@ -232,39 +232,78 @@ class Descent(Construction):
                                 split_sub_tours = b_tour[tr_len + pv_len + mt_len:]
                             return tr, pv, main_tours, split_sub_tours
 
-    def remove_root(self, route):
+    def remove_root(self, route, main_routes, sub_routes):
         root = None
+        temp_r = deepcopy(route)
         for cus in route:
-            if cus in self.connectors():
+            if cus in self.connectors(main_routes, sub_routes):
                 root = cus
-                route.remove(cus)
-        return route, root
+                temp_r.remove(cus)
+        return temp_r, root
 
     def find_main(self, main_tours, removed_route):
         for route_m in main_tours:
             if removed_route[1] in route_m:
                 # new_connector = random.choice(route_m)
                 return route_m
+    
+    def connectors(self, main_routes, sub_routes):
+        connectors = []
+        for route_i in main_routes:
+            for cus_i in route_i:
+                for route_j in sub_routes:
+                    for cus_j in route_j:
+                        if cus_i == cus_j:
+                            connectors.append(cus_i)
+        return connectors
 
     def strr(self, main_tours, split_sub_tours):
-        print("sub_tours of strr:", split_sub_tours)
+        # print("sub_tours of strr:", split_sub_tours)
         for route in split_sub_tours:
+            if len(route) == 2:
+                return route
             print("route:", route)
             length = self.tour_length(route)
-            print("pre_length", length)
-            removed_route = self.remove_root(route)
+            # print("pre_length", length)
+            # when root remmoved, both route and split_sub_tours change
+            # this returns route and the removed root
+            removed_route = self.remove_root(route, main_tours, split_sub_tours)
             its_main = self.find_main(main_tours, removed_route)
-            sub_tour = removed_route[0]
+            sub_tour = deepcopy(removed_route[0])
+            print("removed route:", sub_tour)
+            print("its main:", its_main)
+            # print("sub_tour", sub_tour)
             for node in its_main:
                 print("try_node:", node)
                 if (node == removed_route[1]) or (node == "a"):
-                    break
+                    continue
+                # print("len range:", len(removed_route[0]))
                 for n in range(len(sub_tour)):
                     sub_tour.insert(n, node)
                     new_length = self.tour_length(sub_tour)
                     # print("new_length:", new_length)
-                    if new_length < length:
-                        return sub_tour
+                    if new_length >= length:
+                        sub_tour = route
+                    else:
+                        for n, i in enumerate(split_sub_tours):
+                            if i == route:
+                                split_sub_tours[n] = sub_tour
+                        return split_sub_tours
+
+    def two_opt(self, route):
+        # for route in routes:
+        best = route
+        improved = True
+        while improved:
+            improved = False
+            for i in range(len(route) - 1):
+                for j in range(i + 1, len(route)):
+                    new_route = route[:i + 1] + list(reversed(route[i:j + 1])) + route[j + 1:]
+                    if self.tour_length(new_route) < self.tour_length(route):
+                        best = new_route
+                        improved = True
+            route = best
+        return best
             
     # descent and tabu
     def improvement(self):
@@ -281,15 +320,74 @@ class Descent(Construction):
         for tour in sub_tours:
             split_sub_tours += tour
 
-        step_one = self.opd1(tr, pv, main_tours, split_sub_tours)
-        print("after opd1:", step_one, '\n')
-        step_two = self.opd2(step_one[0], step_one[1], step_one[2], step_one[3])
-        print("after opd2:", step_two, '\n')
-        step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
-        print("after tpd:", step_three, '\n')
-        step_four = self.strr(step_three[2], step_three[3])
-        print("after strr:", step_four)
+        # step_one = self.opd1(tr, pv, main_tours, split_sub_tours)
+        # print("after opd1:", step_one, '\n')
+        # print(tr, pv, main_tours, split_sub_tours)
+        # step_two = self.opd2(step_one[0], step_one[1], step_one[2], step_one[3])
+        # print("after opd2:", step_two, '\n')
+        # step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
+        # print("after tpd:", step_three, '\n')
+        # step_four = self.strr(step_three[2], step_three[3])
+        # print("after strr:", step_four)
+        # for i in step_three[0]:
+        #     print("input:", i)
+        #     print(self.two_opt(i))
+        # print("en", step_three[0])
 
+        is_moving = True
+        while is_moving:
+            print("before looping:", tr, pv, main_tours, split_sub_tours)
+            step_one = self.opd1(tr, pv, main_tours, split_sub_tours)
+
+            if step_one == None:
+                step_two = self.opd2(tr, pv, main_tours, split_sub_tours)
+            else:
+                step_two = self.opd2(step_one[0], step_one[1], step_one[2], step_one[3])
+
+                if step_two == None:
+                    step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
+                else:
+                    step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
+
+                    if step_two == None:
+                        step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
+                    else:
+                        step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
+
+                        if step_two == None:
+                            step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
+                        else:
+                            step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
+                
+            else:
+                
+            step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
+            print("after step_three:", step_three)
+            step_four = self.strr(step_three[2], step_three[3])
+            tr, pv, main_tours, split_sub_tours = step_three[0], step_three[1], step_three[2], step_four
+            print("after  looping:", tr, pv, main_tours, split_sub_tours)
+            print(step_one == None)
+            print(step_two == None)
+            print(step_three == None)
+            print(step_four == None)
+            # print("camp looping:", step_three[0], step_three[1], step_three[2], step_four)
+            # break
+            if (step_one == None) & (step_two == None) & (step_three == None) & (step_four == None):
+                is_moving = False
+            elif step_one == None:
+                tr, pv, main_tours, split_sub_tours = ?
+            elif 
+                # for route in step_three[0]:
+                #     self.two_opt(route)
+                
+                # self.two_opt(step_three[0])
+                # self.two_opt(step_three[1])
+                # self.two_opt(step_three[2])
+                # self.two_opt(step_four[])
+        print("after looping:", tr, pv, main_tours, split_sub_tours)
+        
+        # do tabu search, receive routes from above procedures 😛        
+        
 if __name__ == "__main__":
     d = Descent()
     print(d.improvement())
