@@ -61,6 +61,7 @@ class Descent(Construction):
                     continue
                 penalty_r = max((self.penalty(route_r, tr, pv, main_tours, split_sub_tours) -
                                  self.one.get_demands()[cus]), 0)
+                # theta_r = self.penalty(route_r, tr, pv, main_tours, split_sub_tours)
                 for route_s in b_tour:
                     # print("S:", route_s)
                     if route_s == route_r or (self.one.get_types()[cus] == 1 & (route_s in pv or route_s in main_tours)):
@@ -68,9 +69,9 @@ class Descent(Construction):
                     penalty_s = max((self.tour_demand(route_s) +
                                      self.one.get_demands()[cus] -
                                      self.tour_cap(route_s, tr, pv, main_tours, split_sub_tours)), 0)
+                    # theta_s = self.penalty(route_s, tr, pv, main_tours, split_sub_tours)
                     if (route_s in split_sub_tours) & (penalty_s > 0):
                         continue
-
                     temp_r = deepcopy(route_r)
                     temp_s = deepcopy(route_s)
                     move = self.move(temp_r, temp_s, cus)
@@ -81,6 +82,7 @@ class Descent(Construction):
                     temp_r_penalty = max((self.tour_demand(move[0]) - self.tour_cap(route_r, tr, pv, main_tours, split_sub_tours)), 0)
                     penalty_new_r = max((temp_r_penalty - self.one.get_demands()[cus]), 0)
                     if (penalty_new_s <= penalty_s) & ((penalty_new_r < penalty_r) or (cost_of_move < 0)):
+                    # if (penalty_s <= theta_s) & ((penalty_r < theta_r) or (cost_of_move < 0)):
                         for n, i in enumerate(b_tour):
                             if i == route_r:
                                 b_tour[n] = move[0]
@@ -105,7 +107,7 @@ class Descent(Construction):
                             split_sub_tours = b_tour[tr_len + pv_len + mt_len:]
                         return tr, pv, main_tours, split_sub_tours, True
                     elif n == len(a_tour):
-                        print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
+                        # print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
                         return tr, pv, main_tours, split_sub_tours, False
 
     # sub tours is examined then
@@ -136,6 +138,7 @@ class Descent(Construction):
                     continue
                 penalty_r = max((self.penalty(route_r, tr, pv, main_tours, split_sub_tours) -
                                  self.one.get_demands()[cus]), 0)
+                # theta_r = self.penalty(route_r, tr, pv, main_tours, split_sub_tours)
                 for route_s in b_tour:
                     # print("try_subS:", route_s)
                     if route_s == route_r or (self.one.get_types()[cus] == 1 & (route_s in pv or route_s in main_tours)):
@@ -143,6 +146,7 @@ class Descent(Construction):
                     penalty_s = max((self.tour_demand(route_s) +
                                      self.one.get_demands()[cus] - 
                                      self.tour_cap(route_s, tr, pv, main_tours, split_sub_tours)), 0)
+                    # theta_s = self.penalty(route_s, tr, pv, main_tours, split_sub_tours)                 
                     if (route_s in split_sub_tours) & (penalty_s > 0):
                         continue
 
@@ -157,6 +161,7 @@ class Descent(Construction):
                     temp_r_penalty = max((self.tour_demand(move[0]) - self.tour_cap(route_r, tr, pv, main_tours, split_sub_tours)), 0)
                     penalty_new_r = max((temp_r_penalty - self.one.get_demands()[cus]), 0)
                     if (penalty_new_s <= penalty_s) & ((penalty_new_r < penalty_r) or (cost_of_move < 0)):
+                    # if (penalty_s <= theta_s) & ((penalty_r < theta_r) or (cost_of_move < 0)):
                         for n, i in enumerate(b_tour):
                             if i == route_r:
                                 b_tour[n] = move[0]
@@ -181,7 +186,7 @@ class Descent(Construction):
                             split_sub_tours = b_tour[tr_len + pv_len + mt_len:]
                         return tr, pv, main_tours, split_sub_tours, True
                     elif n == len(split_sub_tours):
-                        print("end2 is {end} n is {nn}".format(end = len(split_sub_tours), nn = n))
+                        # print("end2 is {end} n is {nn}".format(end = len(split_sub_tours), nn = n))
                         return tr, pv, main_tours, split_sub_tours, False
     
     def tpd(self, tr, pv, main_tours, split_sub_tours):
@@ -211,18 +216,20 @@ class Descent(Construction):
                                      self.one.get_demands()[cusj] - 
                                      self.one.get_demands()[cusi] - 
                                      self.tour_cap(route_r, tr, pv, main_tours, split_sub_tours)), 0)
+                        # theta_r = self.penalty(route_r, tr, pv, main_tours, split_sub_tours)
                         penalty_s = max((self.tour_demand(route_s) +
                                      self.one.get_demands()[cusi] - 
                                      self.one.get_demands()[cusj] - 
                                      self.tour_cap(route_s, tr, pv, main_tours, split_sub_tours)), 0)
+                        # theta_s = self.penalty(route_s, tr, pv, main_tours, split_sub_tours)
                         if ((route_s in split_sub_tours) & (penalty_s > 0)) or ((route_r in split_sub_tours) & (penalty_r > 0)):
                             continue
                         temp_r = deepcopy(route_r)
                         temp_s = deepcopy(route_s)
                         move1 = self.move(temp_r, temp_s, cusi)
-                        move2 = self.move(temp_s, temp_r, cusj)
-                        
-                        cost_of_exchange = self.tour_length(move1[0]) - self.tour_length(route_r) + \
+                        move2 = self.move(temp_s, temp_r, cusj) # only use move2's result, bcz it's exchange
+
+                        cost_of_exchange = self.tour_length(move2[1]) - self.tour_length(route_r) + \
                                         self.tour_length(move2[0]) - self.tour_length(route_s)
                         
                         penalty_new_r = max((self.tour_demand(move2[1]) +
@@ -233,8 +240,10 @@ class Descent(Construction):
                                             self.one.get_demands()[cusi] - 
                                             self.one.get_demands()[cusj] - 
                                             self.tour_cap(route_s, tr, pv, main_tours, split_sub_tours)), 0)
-                        if ((penalty_new_r <= penalty_r) & (penalty_new_s <= penalty_new_s)) & \
+                        if ((penalty_new_r <= penalty_r) & (penalty_new_s <= penalty_s)) & \
                             (((penalty_new_r < penalty_r) or (penalty_new_s < penalty_s)) or cost_of_exchange < 0):
+                        # if ((penalty_r <= theta_r) & (penalty_s <= theta_s)) & \
+                        #     (((penalty_r < theta_r) or (penalty_s < theta_s)) or cost_of_exchange < 0):
                             for n, i in enumerate(b_tour):
                                 if i == route_r:
                                     b_tour[n] = move2[1]
@@ -259,7 +268,7 @@ class Descent(Construction):
                                 split_sub_tours = b_tour[tr_len + pv_len + mt_len:]
                             return tr, pv, main_tours, split_sub_tours, True
                         elif n == len(b_tour):
-                            print("end3 is {end} n is {nn}".format(end = len(b_tour), nn = n))
+                            # print("end3 is {end} n is {nn}".format(end = len(b_tour), nn = n))
                             return tr, pv, main_tours, split_sub_tours, False
 
     def remove_root(self, route, main_routes, sub_routes):
@@ -383,9 +392,11 @@ class Descent(Construction):
             print("after four:", step_four)
             tr, pv, main_tours, split_sub_tours = step_three[0], step_three[1], step_three[2], step_four[0]
             print("after  looping:", tr, pv, main_tours, split_sub_tours)
+            print("objective:", self.tour_length(tr) + self.tour_length(pv) + self.tour_length(main_tours) + self.tour_length(split_sub_tours), "\n")
             if (step_one[-1] == False) & (step_two[-1] == False) & (step_three[-1] == False) & (step_four[-1] == False):
                 is_moving = False
-        print("after looping:", tr, pv, main_tours, split_sub_tours, "\n")
+        print("after looping:", tr, pv, main_tours, split_sub_tours)
+        print()
         
         # do tabu search, receive routes from above procedures 😛        
         
