@@ -51,13 +51,18 @@ class Descent(Construction):
         b_tour = tr + pv + main_tours + split_sub_tours
         # print("b_tour of opd1:", b_tour)
         
+        n = 0
         for route_r in a_tour:
+            n += 1
+            # print("R:", route_r)
             for cus in route_r:
+                # print("I:", cus)
                 if cus in self.connectors(main_tours, split_sub_tours) or cus == 'a':
                     continue
                 penalty_r = max((self.penalty(route_r, tr, pv, main_tours, split_sub_tours) -
                                  self.one.get_demands()[cus]), 0)
                 for route_s in b_tour:
+                    # print("S:", route_s)
                     if route_s == route_r or (self.one.get_types()[cus] == 1 & (route_s in pv or route_s in main_tours)):
                         continue
                     penalty_s = max((self.tour_demand(route_s) +
@@ -98,7 +103,10 @@ class Descent(Construction):
                             split_sub_tours = []
                         else:
                             split_sub_tours = b_tour[tr_len + pv_len + mt_len:]
-                        return tr, pv, main_tours, split_sub_tours
+                        return tr, pv, main_tours, split_sub_tours, True
+                    elif n == len(a_tour):
+                        print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
+                        return tr, pv, main_tours, split_sub_tours, False
 
     # sub tours is examined then
     def opd2(self, tr, pv, main_tours, split_sub_tours):
@@ -108,13 +116,18 @@ class Descent(Construction):
         pv_len = len(pv)
         mt_len = len(main_tours)
         sst_len = len(split_sub_tours)
+        n = 0
         for route_r in split_sub_tours:
+            # print("sub_r:", route_r)
+            n += 1
             for cus in route_r:
+                # print("sub_cus:", cus)
                 if cus in self.connectors(main_tours, split_sub_tours) or cus == 'a':
                     continue
                 penalty_r = max((self.penalty(route_r, tr, pv, main_tours, split_sub_tours) -
                                  self.one.get_demands()[cus]), 0)
                 for route_s in b_tour:
+                    # print("try_subS:", route_s)
                     if route_s == route_r or (self.one.get_types()[cus] == 1 & (route_s in pv or route_s in main_tours)):
                         continue
                     penalty_s = max((self.tour_demand(route_s) +
@@ -126,6 +139,7 @@ class Descent(Construction):
                     temp_r = deepcopy(route_r)
                     temp_s = deepcopy(route_s)
                     move = self.move(temp_r, temp_s, cus)
+                    # print("opd2 after move:", move)
                     cost_of_move = self.tour_length(move[0]) - self.tour_length(route_r)
                     penalty_new_s = max((self.tour_demand(move[1]) +
                                      self.one.get_demands()[cus] - 
@@ -155,8 +169,10 @@ class Descent(Construction):
                             split_sub_tours = []
                         else:
                             split_sub_tours = b_tour[tr_len + pv_len + mt_len:]
-                        
-                        return tr, pv, main_tours, split_sub_tours
+                        return tr, pv, main_tours, split_sub_tours, True
+                    elif n == len(split_sub_tours):
+                        print("end2 is {end} n is {nn}".format(end = len(split_sub_tours), nn = n))
+                        return tr, pv, main_tours, split_sub_tours, False
     
     def tpd(self, tr, pv, main_tours, split_sub_tours):
         b_tour = tr + pv + main_tours + split_sub_tours
@@ -165,8 +181,9 @@ class Descent(Construction):
         pv_len = len(pv)
         mt_len = len(main_tours)
         sst_len = len(split_sub_tours)
-
+        n = 0
         for route_r in b_tour:
+            n += 1
             for cusi in route_r:
                 if cusi in self.connectors(main_tours, split_sub_tours) or cusi == 'a':
                     continue
@@ -230,7 +247,10 @@ class Descent(Construction):
                                 split_sub_tours = []
                             else:
                                 split_sub_tours = b_tour[tr_len + pv_len + mt_len:]
-                            return tr, pv, main_tours, split_sub_tours
+                            return tr, pv, main_tours, split_sub_tours, True
+                        elif n == len(b_tour):
+                            print("end3 is {end} n is {nn}".format(end = len(b_tour), nn = n))
+                            return tr, pv, main_tours, split_sub_tours, False
 
     def remove_root(self, route, main_routes, sub_routes):
         root = None
@@ -259,22 +279,25 @@ class Descent(Construction):
 
     def strr(self, main_tours, split_sub_tours):
         # print("sub_tours of strr:", split_sub_tours)
+        n = 0
         for route in split_sub_tours:
-            if len(route) == 2:
-                return route
-            print("route:", route)
+            n += 1
+            if (len(route) == 2) or (len(route) == 0):
+                # return route
+                continue
+            # print("route:", route)
             length = self.tour_length(route)
             # print("pre_length", length)
-            # when root remmoved, both route and split_sub_tours change
             # this returns route and the removed root
             removed_route = self.remove_root(route, main_tours, split_sub_tours)
             its_main = self.find_main(main_tours, removed_route)
             sub_tour = deepcopy(removed_route[0])
-            print("removed route:", sub_tour)
-            print("its main:", its_main)
+            # print("removed route:", sub_tour)
+            # print("its main:", its_main)
             # print("sub_tour", sub_tour)
+            
             for node in its_main:
-                print("try_node:", node)
+                # print("try_node:", node)
                 if (node == removed_route[1]) or (node == "a"):
                     continue
                 # print("len range:", len(removed_route[0]))
@@ -282,13 +305,14 @@ class Descent(Construction):
                     sub_tour.insert(n, node)
                     new_length = self.tour_length(sub_tour)
                     # print("new_length:", new_length)
-                    if new_length >= length:
-                        sub_tour = route
-                    else:
+                    if new_length < length:
                         for n, i in enumerate(split_sub_tours):
                             if i == route:
                                 split_sub_tours[n] = sub_tour
-                        return split_sub_tours
+                        return split_sub_tours, True
+                    elif n == len(split_sub_tours):
+                        print("end4 is {end} n is {nn}".format(end = len(split_sub_tours), nn = n))
+                        return split_sub_tours, False
 
     def two_opt(self, route):
         # for route in routes:
@@ -333,50 +357,29 @@ class Descent(Construction):
         #     print("input:", i)
         #     print(self.two_opt(i))
         # print("en", step_three[0])
-
+        
         is_moving = True
         while is_moving:
             print("before looping:", tr, pv, main_tours, split_sub_tours)
             step_one = self.opd1(tr, pv, main_tours, split_sub_tours)
-
-            if step_one == None:
-                step_two = self.opd2(tr, pv, main_tours, split_sub_tours)
-            else:
-                step_two = self.opd2(step_one[0], step_one[1], step_one[2], step_one[3])
-
-                if step_two == None:
-                    step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
-                else:
-                    step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
-
-                    if step_two == None:
-                        step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
-                    else:
-                        step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
-
-                        if step_two == None:
-                            step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
-                        else:
-                            step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
-                
-            else:
-                
+            step_two = self.opd2(tr, pv, main_tours, split_sub_tours)
             step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
-            print("after step_three:", step_three)
+            step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
+            # print("after step_three:", step_three)
             step_four = self.strr(step_three[2], step_three[3])
-            tr, pv, main_tours, split_sub_tours = step_three[0], step_three[1], step_three[2], step_four
+            tr, pv, main_tours, split_sub_tours = step_three[0], step_three[1], step_three[2], step_four[0]
             print("after  looping:", tr, pv, main_tours, split_sub_tours)
-            print(step_one == None)
-            print(step_two == None)
-            print(step_three == None)
-            print(step_four == None)
+            # print(step_one == None)
+            # print(step_two == None)
+            # print(step_three == None)
+            # print(step_four == None)
             # print("camp looping:", step_three[0], step_three[1], step_three[2], step_four)
             # break
-            if (step_one == None) & (step_two == None) & (step_three == None) & (step_four == None):
+            if (step_one[-1] == False) & (step_two[-1] == False) & (step_three[-1] == False) & (step_four[-1] == False):
                 is_moving = False
-            elif step_one == None:
-                tr, pv, main_tours, split_sub_tours = ?
-            elif 
+            # elif step_one == None:
+            #     tr, pv, main_tours, split_sub_tours = ?
+            # elif 
                 # for route in step_three[0]:
                 #     self.two_opt(route)
                 

@@ -77,13 +77,14 @@ class Construction:
         # print(len(current_tour))
         # fuck = len(current_tour)
         # current_tour = self.get_tours()[0]
-        best_tours, best_lengths = [], []
         # for tour in self.get_tours():
         if len(current_tour) == 2:
             return current_tour
+        elif len(current_tour) == 1:
+            return []
         starter = random.choice(current_tour)
         # print(starter)
-        tour, tours, tour_lengths = [starter], [], []
+        tour, tours = [starter], []
         neighbor = self.closest_neighbor(current_tour, starter)
         tour.append(neighbor) # 这里有了第一个 [i, j]
         # print(tour)
@@ -112,10 +113,17 @@ class Construction:
 
     def tour_length(self, tour):
         tour_length = 0.0
-        for i in range(len(tour) - 1):
-            tour_length += self.compute_dist(tour[i], tour[i + 1])
-        tour_length += self.compute_dist(tour[0], tour[-1]) # because it's a circle
-        return tour_length
+        if len(tour) == 0:
+            return tour_length
+        elif len(tour) == 1:
+            return tour_length
+        elif len(tour) == 2:
+            return self.compute_dist(tour[0], tour[1])
+        else:
+            for i in range(len(tour) - 1):
+                tour_length += self.compute_dist(tour[i], tour[i + 1])
+            tour_length += self.compute_dist(tour[0], tour[-1]) # because it's a circle
+            return tour_length
 
     def pure_truck(self):
         pure_truck = []
