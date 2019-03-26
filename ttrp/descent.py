@@ -117,9 +117,19 @@ class Descent(Construction):
         mt_len = len(main_tours)
         sst_len = len(split_sub_tours)
         n = 0
+        # if sub-tours is null, then below
+        m = 0
+        for r in split_sub_tours:
+            if r == []:
+                m += 1
+        if m == len(split_sub_tours):
+            return tr, pv, main_tours, split_sub_tours, False
+
         for route_r in split_sub_tours:
             # print("sub_r:", route_r)
             n += 1
+            if route_r == []:
+                continue
             for cus in route_r:
                 # print("sub_cus:", cus)
                 if cus in self.connectors(main_tours, split_sub_tours) or cus == 'a':
@@ -207,11 +217,11 @@ class Descent(Construction):
                                      self.tour_cap(route_s, tr, pv, main_tours, split_sub_tours)), 0)
                         if ((route_s in split_sub_tours) & (penalty_s > 0)) or ((route_r in split_sub_tours) & (penalty_r > 0)):
                             continue
-                        
                         temp_r = deepcopy(route_r)
                         temp_s = deepcopy(route_s)
                         move1 = self.move(temp_r, temp_s, cusi)
                         move2 = self.move(temp_s, temp_r, cusj)
+                        
                         cost_of_exchange = self.tour_length(move1[0]) - self.tour_length(route_r) + \
                                         self.tour_length(move2[0]) - self.tour_length(route_s)
                         
@@ -282,8 +292,10 @@ class Descent(Construction):
         n = 0
         for route in split_sub_tours:
             n += 1
-            if (len(route) == 2) or (len(route) == 0):
-                # return route
+            # print("n is:", n)
+            if ((len(route) == 2) or (len(route) == 0)) & (n == len(split_sub_tours)): # 可能最后一次在这跳出去了，导致输出是 None
+                return split_sub_tours, False
+            elif (len(route) == 2) or (len(route) == 0):
                 continue
             # print("route:", route)
             length = self.tour_length(route)
@@ -362,32 +374,18 @@ class Descent(Construction):
         while is_moving:
             print("before looping:", tr, pv, main_tours, split_sub_tours)
             step_one = self.opd1(tr, pv, main_tours, split_sub_tours)
-            step_two = self.opd2(tr, pv, main_tours, split_sub_tours)
+            print("after one:", step_one)
+            step_two = self.opd2(step_one[0], step_one[1], step_one[2], step_one[3])
+            print("after two:", step_two)
             step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
-            step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
-            # print("after step_three:", step_three)
+            print("after three:", step_three)
             step_four = self.strr(step_three[2], step_three[3])
+            print("after four:", step_four)
             tr, pv, main_tours, split_sub_tours = step_three[0], step_three[1], step_three[2], step_four[0]
             print("after  looping:", tr, pv, main_tours, split_sub_tours)
-            # print(step_one == None)
-            # print(step_two == None)
-            # print(step_three == None)
-            # print(step_four == None)
-            # print("camp looping:", step_three[0], step_three[1], step_three[2], step_four)
-            # break
             if (step_one[-1] == False) & (step_two[-1] == False) & (step_three[-1] == False) & (step_four[-1] == False):
                 is_moving = False
-            # elif step_one == None:
-            #     tr, pv, main_tours, split_sub_tours = ?
-            # elif 
-                # for route in step_three[0]:
-                #     self.two_opt(route)
-                
-                # self.two_opt(step_three[0])
-                # self.two_opt(step_three[1])
-                # self.two_opt(step_three[2])
-                # self.two_opt(step_four[])
-        print("after looping:", tr, pv, main_tours, split_sub_tours)
+        print("after looping:", tr, pv, main_tours, split_sub_tours, "\n")
         
         # do tabu search, receive routes from above procedures 😛        
         
