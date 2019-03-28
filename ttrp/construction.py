@@ -18,7 +18,7 @@ class Construction:
         self.trailer_num = 3
         self.all_locations = [['a', ['30.0', '40.0']]] + self.one.get_locations()
 
-    # 计算两点之间的距离
+    # compute the distance of two nodes
     def compute_dist(self, i, j):
         for node in self.all_locations:
             if i == node[0]:
@@ -41,7 +41,7 @@ class Construction:
             for index in seq:
                 if self.AM[index] > 0.5:
                     tour.append((ceil((index + 1) / self.truck_num)) - 1) # for a standard index
-            tour.append('a') # 把仓库的索引加进去（代码写的稀烂）
+            tour.append('a') # add the index of depot, awful code
             tours.append(tour)
         return tours
     
@@ -71,7 +71,6 @@ class Construction:
                     new_tour = tour[:index + 1] + [k] + tour[index +1:]
         return new_tour
                 
-    # def cheapest_insertion(self, current_tour):
     def cheapest_insertion(self, current_tour):
         # print("cheapest current tour", current_tour)
         # print(len(current_tour))
@@ -86,18 +85,13 @@ class Construction:
         # print(starter)
         tour, tours = [starter], []
         neighbor = self.closest_neighbor(current_tour, starter)
-        tour.append(neighbor) # 这里有了第一个 [i, j]
+        tour.append(neighbor) # the first [i, j] list
         # print(tour)
         while len(tour) != len(current_tour):
-        # while len(tour) != fuck:    
             tour = self.add_closest_to_tour(current_tour, tour)
             tours.append(tour)
             # print(tour)
         return tour
-
-    def tour_insertion(self):
-        # for tour in self.get_tours():
-        return self.cheapest_insertion(self.get_tours()[0])
 
     def check_route(self, tour):
         # type_list = []

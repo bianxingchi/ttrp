@@ -5,7 +5,7 @@
 # 方案二：将 txt 转换为 csv 之类的文件类型，通过 pandas 来读取
 # 这儿要不要 class 一下，把那些获得的数据也写成函数？
 
-import sys
+# import sys
 
 class ReadData:
     def __init__(self, filename):

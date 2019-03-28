@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-# 这一步给每个客户分配了一种路径，这儿应该用 cplex 求解器来求解
-
 from readdata import ReadData
 from math import hypot
 

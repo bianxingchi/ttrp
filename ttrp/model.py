@@ -4,7 +4,6 @@
 from assignment import Assignment
 import cplex
 
-
 class Model:
     def __init__(self):
         # 建立 cplex 模型
