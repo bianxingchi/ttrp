@@ -111,5 +111,6 @@ class Assignment:
         # print(len(costs_all)) # 10组
         return costs_all
 
-# A = Assignment()
-# print(A.costs_all())
+if __name__ == "__main__":
+    A = Assignment()
+    print(A.costs_all()[0], len(A.costs_all()), len(A.costs_all()[0]))

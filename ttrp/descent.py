@@ -427,10 +427,11 @@ class Descent(Construction):
             penalty = p1 + p2 + p3 + p4
             objective = l1 + l2 + l3 + l4
             print("after  looping:", tr, pv, main_tours, split_sub_tours, objective, penalty, '\n')
-            if (step_one[-1] == False) & (step_two[-1] == False) & (step_three[-1] == False) & (step_four[-1] == False):
+            # if (step_one[-1] == False) & (step_two[-1] == False) & (step_three[-1] == False) & (step_four[-1] == False):
+            if penalty == 0.0:
                 is_moving = False
-        print("after looping:", tr, pv, main_tours, split_sub_tours)
-        print()
+        initial_solution = [tr, pv, main_tours, split_sub_tours]
+        return initial_solution
         
         # do tabu search, receive routes from above procedures 😛        
         
