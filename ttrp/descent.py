@@ -433,7 +433,53 @@ class Descent(Construction):
         initial_solution = [tr, pv, main_tours, split_sub_tours]
         return initial_solution
         
-        # do tabu search, receive routes from above procedures 😛        
+    # descent used within tabu
+    def inner_improve(self, tr, pv, cv):
+        # variables to guarantee do not call
+        # cheapest insertion function secondly
+        main_tours, sub_tours = [], []
+        for seqs in cv:
+            main_tours.append(seqs[0])
+            sub_tours.append(seqs[1]) # this will be a list of list of list
+        split_sub_tours = []
+        for tour in sub_tours:
+            split_sub_tours += tour
+
+        is_moving = True
+        while is_moving:
+            print("before looping:", tr, pv, main_tours, split_sub_tours)
+            step_one = self.opd1(tr, pv, main_tours, split_sub_tours)
+            print("after 1:", step_one)
+            step_two = self.opd2(step_one[0], step_one[1], step_one[2], step_one[3])
+            print("after 2:", step_two)
+            step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
+            print("after 3:", step_three)
+            step_four = self.strr(step_three[2], step_three[3])
+            print("after 4:", step_four)
+            tr, pv, main_tours, split_sub_tours = step_three[0], step_three[1], step_three[2], step_four[0]
+            # print("objective:", self.tour_length(tr) + self.tour_length(pv) + self.tour_length(main_tours) + self.tour_length(split_sub_tours), "\n")
+            p1, p2, p3, p4 = 0.0, 0.0, 0.0, 0.0
+            l1, l2, l3, l4 = 0.0, 0.0, 0.0, 0.0
+            for i in tr:
+                p1 += self.penalty(i, tr, pv, main_tours, split_sub_tours)
+                l1 += self.tour_length(i)
+            for i in pv:
+                p2 += self.penalty(i, tr, pv, main_tours, split_sub_tours)
+                l2 += self.tour_length(i)
+            for i in main_tours:
+                p3 += self.penalty(i, tr, pv, main_tours, split_sub_tours)
+                l3 += self.tour_length(i)
+            for i in split_sub_tours:
+                p4 += self.penalty(i, tr, pv, main_tours, split_sub_tours)
+                l4 += self.tour_length(i)
+            penalty = p1 + p2 + p3 + p4
+            objective = l1 + l2 + l3 + l4
+            print("after  looping:", tr, pv, main_tours, split_sub_tours, objective, penalty, '\n')
+            # if (step_one[-1] == False) & (step_two[-1] == False) & (step_three[-1] == False) & (step_four[-1] == False):
+            if penalty == 0.0:
+                is_moving = False
+        initial_solution = [tr, pv, main_tours, split_sub_tours]
+        return initial_solution   
         
 if __name__ == "__main__":
     d = Descent()

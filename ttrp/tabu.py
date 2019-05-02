@@ -59,7 +59,6 @@ class Tabu:
                             # a valid move is an iteration
                             pi -= 1
 
-
                             for n, i in enumerate(b_tour):
                                 if i == route_r:
                                     b_tour[n] = move[0]
@@ -97,7 +96,8 @@ class Tabu:
         if tour in (tr or pv or main_tours):
             k = "a"
         else:
-            
+            k = connectors #############################################
+
     def searching(self):
         tr = self.primer[0]
         pv = self.primer[1]
@@ -112,11 +112,35 @@ class Tabu:
 
         i_factor = 0.01
         d_factor = 0.1
-        for k == 1, ... , K:
-            opt1
-            opt2
-            tpt
+        // K up to 50
+            # stage1 intensification
+            step_one = self.opt1(tr, pv, main_tours, split_sub_tours)
+            step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3])
+            step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3])
             pi = random[5, 10] for FTB
-            check local stopping rule
+            check local stopping rule INS
             pi -= 1
+            if no move excute, to stage2:
+
+                # stage2 descent
+                inner_des = Descent.inner_improve(step_three[0], step_three[1], step_three[2], step_three[3])
+                check local stopping rule DES
+                
+            # stage3 local clean-up and check GLS
+            // apply 2-opt and check GLS
+            # stage4 diversification
+            if not end, to diversification:
+                step_one = self.opt1(tr, pv, main_tours, split_sub_tours)
+                step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3])
+                step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3])
+                pi = random[5, 10] for FTB
+                check local stopping rule DIS
+                pi -= 1
+                if get one move, restart stage1:
+                    # stage1
+                
         end K loop
+
+if __name__ == "__main__":
+    t = Tabu()
+    print(t.opt1)
