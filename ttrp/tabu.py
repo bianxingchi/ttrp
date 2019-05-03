@@ -92,12 +92,32 @@ class Tabu:
     def tpt(self, tr, pv, main_tours, split_sub_tours):
         pass
     
-    def root_node(self, tour):
-        if tour in (tr or pv or main_tours):
-            k = "a"
-        else:
-            k = connectors #############################################
+    def connectors(self, main_routes, sub_routes):
+        connectors = []
+        for route_i in main_routes:
+            for cus_i in route_i:
+                for route_j in sub_routes:
+                    for cus_j in route_j:
+                        if cus_i == cus_j:
+                            connectors.append(cus_i)
+        return connectors
 
+    # get root node k
+    def get_root(self, tour):
+        if 'a' in tour:
+            k = 'a'
+        else:
+            connectors = self.connectors(mains, subs)
+            for node in tour:
+                if node in connectors:
+                    k = node
+        return k
+
+    def route_index(self):
+        l = 0
+        for route in all_route:
+            l for route = 0 + (先全部间离开，然后拿到该位置的索引)
+    
     def searching(self):
         tr = self.primer[0]
         pv = self.primer[1]
@@ -125,7 +145,7 @@ class Tabu:
                 # stage2 descent
                 inner_des = Descent.inner_improve(step_three[0], step_three[1], step_three[2], step_three[3])
                 check local stopping rule DES
-                
+
             # stage3 local clean-up and check GLS
             // apply 2-opt and check GLS
             # stage4 diversification
@@ -140,6 +160,7 @@ class Tabu:
                     # stage1
                 
         end K loop
+        return final_result
 
 if __name__ == "__main__":
     t = Tabu()
