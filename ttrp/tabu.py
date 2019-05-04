@@ -116,6 +116,7 @@ class Tabu:
     def route_index(self):
         l = 0
         for route in all_route:
+
             l for route = 0 + (先全部间离开，然后拿到该位置的索引)
     
     def searching(self):
@@ -129,6 +130,12 @@ class Tabu:
         split_sub_tours = []
         for tour in sub_tours:
             split_sub_tours += tour
+
+        # try set route index by route type
+        inx = 10
+        for route in tr:
+            route.append([inx])
+            inx += 1
 
         i_factor = 0.01
         d_factor = 0.1
