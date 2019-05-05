@@ -132,10 +132,22 @@ class Tabu:
             split_sub_tours += tour
 
         # try set route index by route type
-        inx = 10
+        inx1 = 10
         for route in tr:
-            route.append([inx])
-            inx += 1
+            route.append([inx1])
+            inx1 += 1
+        inx2 = 20
+        for route in tr:
+            route.append([inx2])
+            inx2 += 1
+        inx3 = 30
+        for route in tr:
+            route.append([inx3])
+            inx3 += 1
+        inx4 = 40
+        for route in tr:
+            route.append([inx4])
+            inx4 += 1
 
         i_factor = 0.01
         d_factor = 0.1
