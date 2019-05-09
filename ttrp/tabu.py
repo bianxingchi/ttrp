@@ -8,7 +8,7 @@ class Tabu:
     def __init__(self):
         self.primer = Descent.improvement()
     # one-point tabu search mprovement
-    def opt1(self, tr, pv, main_tours, split_sub_tours):
+    def opt1(self, tr, pv, main_tours, split_sub_tours, factor):
         tr_len = len(tr)
         pv_len = len(pv)
         mt_len = len(main_tours)
@@ -86,10 +86,10 @@ class Tabu:
                             # print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
                             return tr, pv, main_tours, split_sub_tours, False
 
-    def opt2(self, tr, pv, main_tours, split_sub_tours):
+    def opt2(self, tr, pv, main_tours, split_sub_tours, factor):
         pass
 
-    def tpt(self, tr, pv, main_tours, split_sub_tours):
+    def tpt(self, tr, pv, main_tours, split_sub_tours, factor):
         pass
     
     def connectors(self, main_routes, sub_routes):
@@ -149,37 +149,39 @@ class Tabu:
             route.append([inx4])
             inx4 += 1
 
-        i_factor = 0.01
-        d_factor = 0.1
-        // K up to 50
             # stage1 intensification
-            step_one = self.opt1(tr, pv, main_tours, split_sub_tours)
-            step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3])
-            step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3])
+            K up to 50
+            i_factor = 0.01
+            step_one = self.opt1(tr, pv, main_tours, split_sub_tours, i_factor)
+            step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], i_factor)
+            step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], i_factor)
             pi = random[5, 10] for FTB
             check local stopping rule INS
             pi -= 1
-            if no move excute, to stage2:
 
+            if no move excute, to stage2:
                 # stage2 descent
                 inner_des = Descent.inner_improve(step_three[0], step_three[1], step_three[2], step_three[3])
                 check local stopping rule DES
 
             # stage3 local clean-up and check GLS
-            // apply 2-opt and check GLS
+            apply 2-opt and check GLS
+
             # stage4 diversification
             if not end, to diversification:
-                step_one = self.opt1(tr, pv, main_tours, split_sub_tours)
-                step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3])
-                step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3])
+                K up to 50
+                d_factor = 0.1
+                step_one = self.opt1(tr, pv, main_tours, split_sub_tours, d_factor)
+                step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], d_factor)
+                step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], d_factor)
                 pi = random[5, 10] for FTB
                 check local stopping rule DIS
                 pi -= 1
-                if get one move, restart stage1:
+
+                if get one move, restart from stage1:
                     # stage1
-                
-        end K loop
-        return final_result
+
+        return final_solution
 
 if __name__ == "__main__":
     t = Tabu()
