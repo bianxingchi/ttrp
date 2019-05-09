@@ -2,11 +2,12 @@
 # coding=utf-8
 
 from descent import Descent
-import A B C D # 这里考虑到要不要写一个 base 代码
+# import A B C D # 这里考虑到要不要写一个 base 代码
 
 class Tabu:
     def __init__(self):
-        self.primer = Descent.improvement()
+        self.primer = Descent().improvement()
+    '''
     # one-point tabu search mprovement
     def opt1(self, tr, pv, main_tours, split_sub_tours, factor):
         tr_len = len(tr)
@@ -48,7 +49,7 @@ class Tabu:
                     temp_s = deepcopy(route_s)
                     move = self.move(temp_r, temp_s, cus)
                     obj = self.tour_length(move[0])
-                    // 待定义：best_obj
+                    # 待定义：best_obj
                     otb = False
                     if obj - best_obj >= i_factor * best_obj:
                         otb = True
@@ -118,37 +119,37 @@ class Tabu:
         for route in all_route:
 
             l for route = 0 + (先全部间离开，然后拿到该位置的索引)
-    
+    '''
+
     def searching(self):
+        print("PRIMER:", self.primer)
         tr = self.primer[0]
         pv = self.primer[1]
-        cv = self.primer[2]
-        main_tours, sub_tours = [], []
-        for seqs in cv:
-            main_tours.append(seqs[0])
-            sub_tours.append(seqs[1]) # this will be a list of list of list
-        split_sub_tours = []
-        for tour in sub_tours:
-            split_sub_tours += tour
+        main_tours = self.primer[2]
+        split_sub_tours = self.primer[3]
+        
 
-        # try set route index by route type
+        # try set route index by route type (L)
         inx1 = 10
         for route in tr:
             route.append([inx1])
             inx1 += 1
         inx2 = 20
-        for route in tr:
+        for route in pv:
             route.append([inx2])
             inx2 += 1
         inx3 = 30
-        for route in tr:
+        for route in main_tours:
             route.append([inx3])
             inx3 += 1
         inx4 = 40
-        for route in tr:
+        for route in split_sub_tours:
             route.append([inx4])
             inx4 += 1
 
+        print(tr, pv, main_tours, split_sub_tours)
+
+        '''
             # stage1 intensification
             K up to 50
             i_factor = 0.01
@@ -169,6 +170,7 @@ class Tabu:
 
             # stage4 diversification
             if not end, to diversification:
+
                 K up to 50
                 d_factor = 0.1
                 step_one = self.opt1(tr, pv, main_tours, split_sub_tours, d_factor)
@@ -182,7 +184,9 @@ class Tabu:
                     # stage1
 
         return final_solution
+        '''
 
 if __name__ == "__main__":
     t = Tabu()
-    print(t.opt1)
+    # print(t.opt1)
+    print(t.searching())
