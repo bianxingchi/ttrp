@@ -155,7 +155,7 @@ class Tabu:
 
         print(tr, pv, main_tours, split_sub_tours)
 
-        '''
+        
         # stage1 intensification
         # K up to 50
         i_factor = 0.01
@@ -190,7 +190,7 @@ class Tabu:
                 # stage1
 
         return final_solution
-        '''
+        
 
 if __name__ == "__main__":
     t = Tabu()
