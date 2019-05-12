@@ -55,6 +55,8 @@ class Tabu:
                         otb = True
                     if (penalty_s <= theta_s) & ((penalty_r < theta_r) or (otb == False)): # then(I'm not sure here)
                         if ((move not in tabu_list) or ((move in tabu_list) & (obj < best_obj))) & (obj < r_obj):
+                            node_k = self.get_root(route_s, main_tours, split_sub_tours)
+                            inx_l = self.route_inx(route_s, tr, pv, main_tours, split_sub_tours)
                             tabu_list.append((cus, node_k, inx_l))
                             best_obj = new tour's length
                             # a valid move is an iteration
@@ -102,18 +104,18 @@ class Tabu:
                         if cus_i == cus_j:
                             connectors.append(cus_i)
         return connectors
-    '''
+    
     # get root node k
-    def get_root(self, tour):
+    def get_root(self, tour, main_routes, sub_routes):
         if 'a' in tour:
             k = 'a'
         else:
-            connectors = self.connectors(mains, subs)
+            connectors = self.connectors(main_routes, sub_routes)
             for node in tour:
                 if node in connectors:
                     k = node
         return k
-    '''
+    
 
     def route_inx(self, route, tr, pv, main_tours, split_sub_tours):
         if route in tr:
