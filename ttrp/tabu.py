@@ -102,7 +102,7 @@ class Tabu:
                         if cus_i == cus_j:
                             connectors.append(cus_i)
         return connectors
-    
+    '''
     # get root node k
     def get_root(self, tour):
         if 'a' in tour:
@@ -113,6 +113,18 @@ class Tabu:
                 if node in connectors:
                     k = node
         return k
+    '''
+
+    def route_inx(self, route, tr, pv, main_tours, split_sub_tours):
+        if route in tr:
+            inx = 10 + tr.index(route)
+        elif route in pv:
+            inx = 20 + pv.index(route)
+        elif route in main_tours:
+            inx = 30 + main_tours.index(route)
+        elif route in split_sub_tours:
+            inx = 40 + split_sub_tours.index(route)
+        return inx
 
     def searching(self):
         print("PRIMER:", self.primer)
@@ -122,22 +134,22 @@ class Tabu:
         split_sub_tours = self.primer[3]
 
         # try set route index by route type (L)
-        inx1 = 10
-        for route in tr:
-            route.append([inx1])
-            inx1 += 1
-        inx2 = 20
-        for route in pv:
-            route.append([inx2])
-            inx2 += 1
-        inx3 = 30
-        for route in main_tours:
-            route.append([inx3])
-            inx3 += 1
-        inx4 = 40
-        for route in split_sub_tours:
-            route.append([inx4])
-            inx4 += 1
+        # inx1 = 10
+        # for route in tr:
+        #     route.append([inx1])
+        #     inx1 += 1
+        # inx2 = 20
+        # for route in pv:
+        #     route.append([inx2])
+        #     inx2 += 1
+        # inx3 = 30
+        # for route in main_tours:
+        #     route.append([inx3])
+        #     inx3 += 1
+        # inx4 = 40
+        # for route in split_sub_tours:
+        #     route.append([inx4])
+        #     inx4 += 1
 
         print(tr, pv, main_tours, split_sub_tours)
 
