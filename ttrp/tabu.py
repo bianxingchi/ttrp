@@ -2,6 +2,7 @@
 # coding=utf-8
 
 from descent import Descent
+import random
 # import A B C D # 这里考虑到要不要写一个 base 代码
 
 class Tabu:
@@ -9,7 +10,7 @@ class Tabu:
         self.primer = Descent().improvement()
     
     # one-point tabu search mprovement
-    def opt1(self, tr, pv, main_tours, split_sub_tours, factor):
+    def opt1(self, tr, pv, main_tours, split_sub_tours, factor, pi):
         tr_len = len(tr)
         pv_len = len(pv)
         mt_len = len(main_tours)
@@ -21,8 +22,8 @@ class Tabu:
         for route_r in a_tour:
             n += 1
             # print("R:", route_r)
-            r_obj = self.tour_length(route_r)
-            best_obj = deepcopy(r_obj)
+            r_obj = self.tour_length(route_r)   # 看这里看这里
+            best_obj = deepcopy(r_obj)          # 看这里看这里
             pi = random.choice([5, 6, 7, 8, 9, 10])
             tabu_list = []
 
@@ -58,7 +59,7 @@ class Tabu:
                             node_k = self.get_root(route_s, main_tours, split_sub_tours)
                             inx_l = self.route_inx(route_s, tr, pv, main_tours, split_sub_tours)
                             tabu_list.append((cus, node_k, inx_l))
-                            best_obj = new tour's length
+                            best_obj = obj
                             # a valid move is an iteration
                             pi -= 1
 
@@ -86,6 +87,7 @@ class Tabu:
                                 split_sub_tours = b_tour[tr_len + pv_len + mt_len:]
                             return tr, pv, main_tours, split_sub_tours, True
                         elif n == len(a_tour):
+                            # False means no move occured in opt1
                             # print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
                             return tr, pv, main_tours, split_sub_tours, False
 
@@ -155,39 +157,50 @@ class Tabu:
 
         print(tr, pv, main_tours, split_sub_tours)
 
-        
         # stage1 intensification
         # K up to 50
         i_factor = 0.01
-        step_one = self.opt1(tr, pv, main_tours, split_sub_tours, i_factor)
-        step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], i_factor)
-        step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], i_factor)
-        pi = random[5, 10] for FTB
+        pi = random.choice([5, 6, 7, 8, 9, 10])
+        step_one = self.opt1(tr, pv, main_tours, split_sub_tours, i_factor, pi)
+        step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], i_factor, pi)
+        step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], i_factor, pi)
         check local stopping rule INS
-        pi -= 1
+        # pi -= 1
 
-        if no move excute, to stage2:
+        if one move excute, to stage2:
             # stage2 descent
             inner_des = Descent.inner_improve(step_three[0], step_three[1], step_three[2], step_three[3])
             check local stopping rule DES
 
-        # stage3 local clean-up and check GLS
-        apply 2-opt and check GLS
+            # stage3 local clean-up and check GLS
+            apply 2-opt and check GLS （inten\descen\diver 连续30次（至少），同时连续10次迭代没有出现新的最好解)
 
-        # stage4 diversification
-        if not end, to diversification:
+            # stage4 diversification
+            if not end, to diversification:
+                # K up to 50
+                d_factor = 0.1
+                pi = random.choice([5, 6, 7, 8, 9, 10])
+                step_one = self.opt1(tr, pv, main_tours, split_sub_tours, d_factor, pi)
+                step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], d_factor, pi)
+                step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], d_factor, pi)
+                check local stopping rule DIS (只要有一个新解就行)
+                # pi -= 1
 
-            K up to 50
-            d_factor = 0.1
-            step_one = self.opt1(tr, pv, main_tours, split_sub_tours, d_factor)
-            step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], d_factor)
-            step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], d_factor)
-            pi = random[5, 10] for FTB
-            check local stopping rule DIS
-            pi -= 1
+                if get one move, restart from stage1:
+                    # stage1
 
-            if get one move, restart from stage1:
-                # stage1
+        else:
+            # K up to 50
+                d_factor = 0.1
+                pi = random.choice([5, 6, 7, 8, 9, 10])
+                step_one = self.opt1(tr, pv, main_tours, split_sub_tours, d_factor, pi)
+                step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], d_factor, pi)
+                step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], d_factor, pi)
+                check local stopping rule DIS (只要有一个新解就行)
+                # pi -= 1
+
+                if get one move, restart from stage1:
+                    # stage1
 
         return final_solution
         
