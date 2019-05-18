@@ -85,7 +85,7 @@ class Tabu:
                                 split_sub_tours = []
                             else:
                                 split_sub_tours = b_tour[tr_len + pv_len + mt_len:]
-                            return tr, pv, main_tours, split_sub_tours, True
+                            return tr, pv, main_tours, split_sub_tours, True # 看这里看这里看这里看这里
                         elif n == len(a_tour):
                             # False means no move occured in opt1
                             # print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
@@ -130,6 +130,46 @@ class Tabu:
             inx = 40 + split_sub_tours.index(route)
         return inx
 
+    # stage1 intensification
+    def stage_one(self, tr, pv, main_tours, split_sub_tours):
+        if i_factor < 0.1:
+            step_one = self.opt1(tr, pv, main_tours, split_sub_tours, i_factor, pi)
+            step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], i_factor, pi)
+            step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], i_factor, pi)
+            if (step_one == None) & (step_one == None) & (step_one == None):
+                i_factor += 0.01
+            if (step_one == None) & (step_one == None) & (step_one == None) & (i_factor == 0.1):
+                is_moving = False
+            # pi -= 1
+
+    # stage2 descent
+    def stage_two(self, tr, pv, main_tours, split_sub_tours):
+        if is_moving == True:
+            inner_des = Descent.inner_improve(step_three[0], step_three[1], step_three[2], step_three[3])
+            # 当移动五次，就停下来如何？这个停止条件要定义在 inner_improve 内部
+
+    # stage3 local clean-up and check GLS
+    # inten\descen\diver 连续30次（至少），同时连续10次迭代没有出现新的更优解
+    def stage_three(self, tr, pv, main_tours, split_sub_tours):
+        clean_up = Descent.two_opt(inner_des)
+            stage1 & stage2 & stage4 performed 30 times && 10 times no move excuted, return FINAL_SOLUTION
+
+    # stage4 diversification
+    def stage_four(self, tr, pv, main_tours, split_sub_tours):
+        # K up to 50
+        d_factor = 0.1
+        pi = random.choice([5, 6, 7, 8, 9, 10])
+        # recieve the result from clean_up
+        step_one = self.opt1(clean_up[0], clean_up[1], clean_up[2], clean_up[3], d_factor, pi)
+        step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], d_factor, pi)
+        step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], d_factor, pi)
+        # 👀👀👀👀👀👀👀
+        
+        # pi -= 1
+
+        if get one move, restart from stage1:
+            # stage1
+
     def searching(self):
         print("PRIMER:", self.primer)
         tr = self.primer[0]
@@ -161,22 +201,58 @@ class Tabu:
         # K up to 50
         i_factor = 0.01
         pi = random.choice([5, 6, 7, 8, 9, 10])
-        step_one = self.opt1(tr, pv, main_tours, split_sub_tours, i_factor, pi)
-        step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], i_factor, pi)
-        step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], i_factor, pi)
-        check local stopping rule INS
-        # pi -= 1
+        is_moving = True
+        is_end = False
 
-        if one move excute, to stage2:
+        if is_end == False:
+
+            '''
+            if i_factor < 0.1:
+                self.stage_one(tr, pv, main_tours, split_sub_tours)
+            if is_moving == True:
+                self.stage_two(tr, pv, main_tours, split_sub_tours)
+                self.stage_three(tr, pv, main_tours, split_sub_tours)
+                self.stage_four(tr, pv, main_tours, split_sub_tours)
+            else:
+                self.stage_four(tr, pv, main_tours, split_sub_tours)
+            '''
+
+            if i_factor < 0.1:
+                step_one = self.opt1(tr, pv, main_tours, split_sub_tours, i_factor, pi)
+                step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], i_factor, pi)
+                step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], i_factor, pi)
+                if (step_one == None) & (step_one == None) & (step_one == None):
+                    i_factor += 0.01
+                if (step_one == None) & (step_one == None) & (step_one == None) & (i_factor == 0.1):
+                    is_moving = False
+                # pi -= 1
+
             # stage2 descent
-            inner_des = Descent.inner_improve(step_three[0], step_three[1], step_three[2], step_three[3])
-            check local stopping rule DES
+            if is_moving == True:
+                inner_des = Descent.inner_improve(step_three[0], step_three[1], step_three[2], step_three[3])
+                # 当移动五次，就停下来如何？这个停止条件要定义在 inner_improve 内部
 
-            # stage3 local clean-up and check GLS
-            apply 2-opt and check GLS （inten\descen\diver 连续30次（至少），同时连续10次迭代没有出现新的最好解)
+                # stage3 local clean-up and check GLS
+                # inten\descen\diver 连续30次（至少），同时连续10次迭代没有出现新的更优解
+                clean_up = Descent.two_opt(inner_des)
+                stage1 & stage2 & stage4 performed 30 times && 10 times no move excuted, return FINAL_SOLUTION
 
-            # stage4 diversification
-            if not end, to diversification:
+                # stage4 diversification
+                # K up to 50
+                d_factor = 0.1
+                pi = random.choice([5, 6, 7, 8, 9, 10])
+                # recieve the result from clean_up
+                step_one = self.opt1(clean_up[0], clean_up[1], clean_up[2], clean_up[3], d_factor, pi)
+                step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], d_factor, pi)
+                step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], d_factor, pi)
+                # 👀👀👀👀👀👀👀
+                
+                # pi -= 1
+
+                if get one move, restart from stage1:
+                    # stage1
+
+            else:
                 # K up to 50
                 d_factor = 0.1
                 pi = random.choice([5, 6, 7, 8, 9, 10])
@@ -189,20 +265,7 @@ class Tabu:
                 if get one move, restart from stage1:
                     # stage1
 
-        else:
-            # K up to 50
-                d_factor = 0.1
-                pi = random.choice([5, 6, 7, 8, 9, 10])
-                step_one = self.opt1(tr, pv, main_tours, split_sub_tours, d_factor, pi)
-                step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], d_factor, pi)
-                step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], d_factor, pi)
-                check local stopping rule DIS (只要有一个新解就行)
-                # pi -= 1
-
-                if get one move, restart from stage1:
-                    # stage1
-
-        return final_solution
+            return final_solution
         
 
 if __name__ == "__main__":
