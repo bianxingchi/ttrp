@@ -204,7 +204,7 @@ class Tabu:
         is_moving = True
         is_end = False
 
-        if is_end == False:
+        while is_end == False:
 
             '''
             if i_factor < 0.1:
@@ -217,13 +217,13 @@ class Tabu:
                 self.stage_four(tr, pv, main_tours, split_sub_tours)
             '''
 
-            if i_factor < 0.1:
+            while i_factor < 0.1:
                 step_one = self.opt1(tr, pv, main_tours, split_sub_tours, i_factor, pi)
                 step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], i_factor, pi)
                 step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], i_factor, pi)
-                if (step_one == None) & (step_one == None) & (step_one == None):
+                if (step_one == None) & (step_two == None) & (step_three == None):
                     i_factor += 0.01
-                if (step_one == None) & (step_one == None) & (step_one == None) & (i_factor == 0.1):
+                if (step_one == None) & (step_two == None) & (step_three == None) & (i_factor == 0.1):
                     is_moving = False
                 # pi -= 1
 
@@ -235,7 +235,9 @@ class Tabu:
                 # stage3 local clean-up and check GLS
                 # inten\descen\diver 连续30次（至少），同时连续10次迭代没有出现新的更优解
                 clean_up = Descent.two_opt(inner_des)
-                stage1 & stage2 & stage4 performed 30 times && 10 times no move excuted, return FINAL_SOLUTION
+                stage1 & stage2 & stage4 performed 30 times && 10 times no move excuted:
+                    is_end = True
+                    return FINAL_SOLUTION
 
                 # stage4 diversification
                 # K up to 50
@@ -245,28 +247,30 @@ class Tabu:
                 step_one = self.opt1(clean_up[0], clean_up[1], clean_up[2], clean_up[3], d_factor, pi)
                 step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], d_factor, pi)
                 step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], d_factor, pi)
-                # 👀👀👀👀👀👀👀
+                if (step_one == None) & (step_two == None) & (step_three == None):
+                    d_factor += 0.05
+                if (step_one == None) & (step_two == None) & (step_three == None) & (i_factor == 0.1):
+                    is_moving = False
                 
-                # pi -= 1
-
-                if get one move, restart from stage1:
-                    # stage1
+                # restart from stage1
+                i_factor = 0.01
 
             else:
                 # K up to 50
                 d_factor = 0.1
                 pi = random.choice([5, 6, 7, 8, 9, 10])
-                step_one = self.opt1(tr, pv, main_tours, split_sub_tours, d_factor, pi)
+                # recieve the result from clean_up
+                step_one = self.opt1(clean_up[0], clean_up[1], clean_up[2], clean_up[3], d_factor, pi)
                 step_two = self.opt2(step_one[0], step_one[1], step_one[2], step_one[3], d_factor, pi)
                 step_three = self.tpt(step_two[0], step_two[1], step_two[2], step_two[3], d_factor, pi)
-                check local stopping rule DIS (只要有一个新解就行)
-                # pi -= 1
+                if (step_one == None) & (step_two == None) & (step_three == None):
+                    d_factor += 0.05
+                if (step_one == None) & (step_two == None) & (step_three == None) & (i_factor == 0.1):
+                    is_moving = False
+                
+                # restart from stage1
+                i_factor = 0.01
 
-                if get one move, restart from stage1:
-                    # stage1
-
-            return final_solution
-        
 
 if __name__ == "__main__":
     t = Tabu()
