@@ -28,7 +28,7 @@ class Tabu:
             tabu_list = []
 
             for cus in route_r:
-                cj = None
+                candidates = None
                 # print("I:", cus)
                 if cus in self.connectors(main_tours, split_sub_tours) or cus == 'a':
                     continue
@@ -52,6 +52,8 @@ class Tabu:
                     obj = self.tour_length(move[0])
                     # 待定义：best_obj
                     otb = False
+                    # best_obj 怎么能这么写呢，肯定是搞错了
+                    # 全局的 best_obj 是针对所有路径长度的，而不是 route_s 单独一条
                     if obj - best_obj >= i_factor * best_obj:
                         otb = True
                     if (penalty_s <= theta_s) & ((penalty_r < theta_r) or (otb == False)): # then(I'm not sure here)
@@ -86,11 +88,12 @@ class Tabu:
                                 split_sub_tours = []
                             else:
                                 split_sub_tours = b_tour[tr_len + pv_len + mt_len:]
-                            return tr, pv, main_tours, split_sub_tours, True # 看这里看这里看这里看这里
-                        elif n == len(a_tour):
-                            # False means no move occured in opt1
-                            # print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
-                            return tr, pv, main_tours, split_sub_tours, False
+
+                            # return tr, pv, main_tours, split_sub_tours, True # 看这里看这里看这里看这里
+                    elif n == len(a_tour):
+                        # False means no move occured in opt1
+                        # print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
+                        return tr, pv, main_tours, split_sub_tours, False
 
     def opt2(self, tr, pv, main_tours, split_sub_tours, factor):
         pass
@@ -141,7 +144,7 @@ class Tabu:
         i_factor = 0.01
         pi = random.choice([5, 6, 7, 8, 9, 10])
         is_moving = True
-        is_end = False
+        is_end = False # for global check
 
         while is_end == False:
             # stage1 intensification
@@ -156,7 +159,7 @@ class Tabu:
                     is_moving = False
                 # pi -= 1
 
-            # stage2 descent
+            # stage2 descent improvement
             if is_moving == True:
                 inner_des = Descent.inner_improve(step_three[0], step_three[1], step_three[2], step_three[3])
                 # 当移动五次，就停下来如何？这个停止条件要定义在 inner_improve 内部
