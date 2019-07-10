@@ -50,7 +50,7 @@ class Descent(Construction):
         a_tour = tr + pv + main_tours
         b_tour = tr + pv + main_tours + split_sub_tours
         # print("b_tour of opd1:", b_tour)
-        n = 0
+        n = 0 # max n is len(a_tour)
         for route_r in a_tour:
             n += 1
             # print("R:", route_r)
@@ -63,14 +63,14 @@ class Descent(Construction):
                 theta_r = self.penalty(route_r, tr, pv, main_tours, split_sub_tours)
                 for route_s in b_tour:
                     # print("S:", route_s)
-                    if route_s == route_r or (self.one.get_types()[cus] == 1 & (route_s in pv or route_s in main_tours)):
+                    if route_s == route_r or (self.one.get_types()[cus] == 1 and (route_s in pv or route_s in main_tours)):
                         continue
                     penalty_s = max((self.tour_demand(route_s) +
                                      self.one.get_demands()[cus] -
                                      self.tour_cap(route_s, tr, pv, main_tours, split_sub_tours)), 0)
                     theta_s = self.penalty(route_s, tr, pv, main_tours, split_sub_tours)
-                    if (route_s in split_sub_tours) & (penalty_s > 0):
-                    # if (route_s in split_sub_tours) & (theta_s > 0):
+                    if (route_s in split_sub_tours) and (penalty_s > 0):
+                    # if (route_s in split_sub_tours) and (theta_s > 0):
                         continue
                     temp_r = deepcopy(route_r)
                     temp_s = deepcopy(route_s)
@@ -83,10 +83,10 @@ class Descent(Construction):
                     # penalty_new_r = max((temp_r_penalty - self.one.get_demands()[cus]), 0)
                     # new_theta_r = max((self.tour_demand(move[0]) - self.tour_cap(route_r, tr, pv, main_tours, split_sub_tours)), 0)
                     # new_theta_s = max((self.tour_demand(move[1]) - self.tour_cap(route_s, tr, pv, main_tours, split_sub_tours)), 0)
-                    if (penalty_s <= theta_s) & ((penalty_r < theta_r) or (cost_of_move < 0)):
-                    # if (new_theta_s <= theta_s) & ((new_theta_r < theta_r) or (cost_of_move < 0)):
-                    # if (penalty_new_s <= penalty_s) & ((penalty_new_r < penalty_r) or (cost_of_move < 0)):
-                    # if (penalty_s <= theta_s) & ((penalty_r < theta_r) or (cost_of_move < 0)):
+                    if (penalty_s <= theta_s) and ((penalty_r < theta_r) or (cost_of_move < 0)):
+                    # if (new_theta_s <= theta_s) and ((new_theta_r < theta_r) or (cost_of_move < 0)):
+                    # if (penalty_new_s <= penalty_s) and ((penalty_new_r < penalty_r) or (cost_of_move < 0)):
+                    # if (penalty_s <= theta_s) and ((penalty_r < theta_r) or (cost_of_move < 0)):
                         for n, i in enumerate(b_tour):
                             if i == route_r:
                                 b_tour[n] = move[0]
@@ -145,14 +145,14 @@ class Descent(Construction):
                 theta_r = self.penalty(route_r, tr, pv, main_tours, split_sub_tours)
                 for route_s in b_tour:
                     # print("try_subS:", route_s)
-                    if route_s == route_r or (self.one.get_types()[cus] == 1 & (route_s in pv or route_s in main_tours)):
+                    if route_s == route_r or (self.one.get_types()[cus] == 1 and (route_s in pv or route_s in main_tours)):
                         continue
                     penalty_s = max((self.tour_demand(route_s) +
                                      self.one.get_demands()[cus] - 
                                      self.tour_cap(route_s, tr, pv, main_tours, split_sub_tours)), 0)
                     theta_s = self.penalty(route_s, tr, pv, main_tours, split_sub_tours)                 
-                    # if (route_s in split_sub_tours) & (penalty_s > 0):
-                    if (route_s in split_sub_tours) & (penalty_s > 0):
+                    # if (route_s in split_sub_tours) and (penalty_s > 0):
+                    if (route_s in split_sub_tours) and (penalty_s > 0):
                         continue
 
                     temp_r = deepcopy(route_r)
@@ -167,10 +167,10 @@ class Descent(Construction):
                     # penalty_new_r = max((temp_r_penalty - self.one.get_demands()[cus]), 0)
                     # new_theta_r = max((self.tour_demand(move[0]) - self.tour_cap(route_r, tr, pv, main_tours, split_sub_tours)), 0)
                     # new_theta_s = max((self.tour_demand(move[1]) - self.tour_cap(route_s, tr, pv, main_tours, split_sub_tours)), 0)
-                    # if (new_theta_s <= theta_s) & ((new_theta_r < theta_r) or (cost_of_move < 0)):
-                    if (penalty_s <= theta_s) & ((penalty_r < theta_r) or (cost_of_move < 0)):
-                    # if (penalty_new_s <= penalty_s) & ((penalty_new_r < penalty_r) or (cost_of_move < 0)):
-                    # if (penalty_s <= theta_s) & ((penalty_r < theta_r) or (cost_of_move < 0)):
+                    # if (new_theta_s <= theta_s) and ((new_theta_r < theta_r) or (cost_of_move < 0)):
+                    if (penalty_s <= theta_s) and ((penalty_r < theta_r) or (cost_of_move < 0)):
+                    # if (penalty_new_s <= penalty_s) and ((penalty_new_r < penalty_r) or (cost_of_move < 0)):
+                    # if (penalty_s <= theta_s) and ((penalty_r < theta_r) or (cost_of_move < 0)):
                         for n, i in enumerate(b_tour):
                             if i == route_r:
                                 b_tour[n] = move[0]
@@ -214,12 +214,12 @@ class Descent(Construction):
                 for route_s in b_tour:
                     if route_s == route_r:
                         continue
-                    elif (self.one.get_types()[cusi] == 1) & (route_s in (pv or main_tours)):
+                    elif (self.one.get_types()[cusi] == 1) and (route_s in (pv or main_tours)):
                         continue
                     for cusj in route_s:
                         if cusj in self.connectors(main_tours, split_sub_tours) or cusj == 'a':
                             continue
-                        elif (self.one.get_types()[cusj] == 1) & (route_s in (pv or main_tours)):
+                        elif (self.one.get_types()[cusj] == 1) and (route_s in (pv or main_tours)):
                             continue
                         penalty_r = max((self.tour_demand(route_r) +
                                      self.one.get_demands()[cusj] - 
@@ -231,10 +231,10 @@ class Descent(Construction):
                                      self.one.get_demands()[cusj] - 
                                      self.tour_cap(route_s, tr, pv, main_tours, split_sub_tours)), 0)
                         theta_s = self.penalty(route_s, tr, pv, main_tours, split_sub_tours)
-                        # if ((route_s in split_sub_tours) & (penalty_s > 0)) or ((route_r in split_sub_tours) & (penalty_r > 0)):
+                        # if ((route_s in split_sub_tours) and (penalty_s > 0)) or ((route_r in split_sub_tours) and (penalty_r > 0)):
                             # continue
-                        # if ((route_s in split_sub_tours) & (theta_s > 0)) or ((route_r in split_sub_tours) & (theta_r > 0)):
-                        if ((route_s in split_sub_tours) & (penalty_s > 0)) or ((route_r in split_sub_tours) & (penalty_r > 0)):
+                        # if ((route_s in split_sub_tours) and (theta_s > 0)) or ((route_r in split_sub_tours) and (theta_r > 0)):
+                        if ((route_s in split_sub_tours) and (penalty_s > 0)) or ((route_r in split_sub_tours) and (penalty_r > 0)):
                             continue
                         temp_r = deepcopy(route_r)
                         temp_s = deepcopy(route_s)
@@ -254,13 +254,13 @@ class Descent(Construction):
                         #                     self.tour_cap(route_s, tr, pv, main_tours, split_sub_tours)), 0)
                         # new_theta_r = max((self.tour_demand(move2[1]) - self.tour_cap(route_r, tr, pv, main_tours, split_sub_tours)), 0)
                         # new_theta_s = max((self.tour_demand(move2[0]) - self.tour_cap(route_s, tr, pv, main_tours, split_sub_tours)), 0)
-                        # if ((penalty_new_r <= penalty_r) & (penalty_new_s <= penalty_s)) & \
+                        # if ((penalty_new_r <= penalty_r) and (penalty_new_s <= penalty_s)) and \
                         #     (((penalty_new_r < penalty_r) or (penalty_new_s < penalty_s)) or cost_of_exchange < 0):
-                        # if ((penalty_r <= theta_r) & (penalty_s <= theta_s)) & \
+                        # if ((penalty_r <= theta_r) and (penalty_s <= theta_s)) and \
                         #     (((penalty_r < theta_r) or (penalty_s < theta_s)) or cost_of_exchange < 0):
-                        # if ((new_theta_r <= theta_r) & (new_theta_s <= theta_s)) & \
+                        # if ((new_theta_r <= theta_r) and (new_theta_s <= theta_s)) and \
                         #     (((new_theta_r < theta_r) or (new_theta_s < theta_s)) or cost_of_exchange < 0):
-                        if ((penalty_r <= theta_r) & (penalty_s <= theta_s)) & \
+                        if ((penalty_r <= theta_r) and (penalty_s <= theta_s)) and \
                             (((penalty_r < theta_r) or (penalty_s < theta_s)) or cost_of_exchange < 0):
                             for n, i in enumerate(b_tour):
                                 if i == route_r:
@@ -320,7 +320,7 @@ class Descent(Construction):
         for route in split_sub_tours:
             n += 1
             # print("n is:", n)
-            if ((len(route) == 2) or (len(route) == 0)) & (n == len(split_sub_tours)): # 可能最后一次在这跳出去了，导致输出是 None
+            if ((len(route) == 2) or (len(route) == 0)) and (n == len(split_sub_tours)): # 可能最后一次在这跳出去了，导致输出是 None
                 return split_sub_tours, False
             elif (len(route) == 2) or (len(route) == 0):
                 continue
@@ -427,13 +427,13 @@ class Descent(Construction):
             penalty = p1 + p2 + p3 + p4
             objective = l1 + l2 + l3 + l4
             print("after  looping:", tr, pv, main_tours, split_sub_tours, objective, penalty, '\n')
-            # if (step_one[-1] == False) & (step_two[-1] == False) & (step_three[-1] == False) & (step_four[-1] == False):
+            # if (step_one[-1] == False) and (step_two[-1] == False) and (step_three[-1] == False) and (step_four[-1] == False):
             if penalty == 0.0:
                 is_moving = False
         initial_solution = [tr, pv, main_tours, split_sub_tours]
         return initial_solution
         
-    # descent used within tabu
+    # descent used within tabu search
     def inner_improve(self, tr, pv, cv):
         # variables to guarantee do not call
         # cheapest insertion function secondly
@@ -475,7 +475,7 @@ class Descent(Construction):
             penalty = p1 + p2 + p3 + p4
             objective = l1 + l2 + l3 + l4
             print("after  looping:", tr, pv, main_tours, split_sub_tours, objective, penalty, '\n')
-            # if (step_one[-1] == False) & (step_two[-1] == False) & (step_three[-1] == False) & (step_four[-1] == False):
+            # if (step_one[-1] == False) and (step_two[-1] == False) and (step_three[-1] == False) and (step_four[-1] == False):
             if penalty == 0.0:
                 is_moving = False
         initial_solution = [tr, pv, main_tours, split_sub_tours]
