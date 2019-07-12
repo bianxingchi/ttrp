@@ -9,16 +9,31 @@ class Tabu(Descent):
     #     self.primer = Descent().improvement()
 
     # return a list stored all root nodes
-    def connectors(self, ):
-        pass
+    # def connectors(self, ):
+    #     pass
 
     # get the root node k of input route
     def get_root(self, ):
-        pass
+        if 'a' in tour:
+            k = 'a'
+        else:
+            connectors = self.connectors(main_routes, sub_routes)
+            for node in tour:
+                if node in connectors:
+                    k = node
+        return k
 
     # get a route's index
     def route_inx(self, ):
-        pass
+        if route in tr:
+            inx = 10 + tr.index(route)
+        elif route in pv:
+            inx = 20 + pv.index(route)
+        elif route in main_tours:
+            inx = 30 + main_tours.index(route)
+        elif route in split_sub_tours:
+            inx = 40 + split_sub_tours.index(route)
+        return inx
 
     # compute all routes' length
     def solution_length(self, solution):
@@ -42,7 +57,8 @@ class Tabu(Descent):
         for route_r in a_tour:
             n += 1
             r_obj = self.tour_length(route_r) # for comparation
-            tabu_list = [] # 👀002 对一个 route_r 来说，存储已经发生过的移动 (i,k,l)
+            tabu_list = [] # 👀002√ 对一个 route_r 来说，存储已经发生过的移动 (i,k,l)
+            list_size = 5 # assign diffrtent number to size
             found = False # 如果在 INS 达到时，还没发现新解，就要更新 i_factor
             for cus in route_r:
                 pi = random.choice([5, 6, 7, 8, 9, 10]) # pi is the searching times
@@ -70,12 +86,20 @@ class Tabu(Descent):
                     move = self.move(temp_r, temp_s, cus)
                     difference = self.tour_length(move[0]) + self.tour_length(move[1]) - self.tour_length(route_r) - self.tour_length(route_s)
                     immediate_obj = current_obj + difference
-                    otb = False # means that this movement's value is satisfied
-                    if immediate_obj - best_obj >= i_factor * best_obj:
-                        otb = True
-                    if theta_s <= penalty_s and ((penalty_r < theta_r) or (otb is False)):
+                    # otb = False # means that this movement's value is satisfied
+                    # if immediate_obj - best_obj >= i_factor * best_obj:
+                        # otb = True
+                    # if theta_s <= penalty_s and ((penalty_r < theta_r) or (otb is False)):
+                    if theta_s <= penalty_s and ((penalty_r < theta_r) or (immediate_obj - best_obj <= i_factor * best_obj)):    
                         if (move not in tabu_list) and (immediate_obj < current_obj):
-                            tabu_list.append()
+                            # tabu_list.append(cus, )
+
+                            node_k = self.get_root(route_s, main_tours, split_sub_tours)
+                            inx_l = self.route_inx(route_s, tr, pv, main_tours, split_sub_tours)
+                            if len(tabu_list) > list_size:
+                                tabu_list.pop(-1)
+                            tabu_list.append((cus, node_k, inx_l))
+
                             current_obj = immediate_obj
                             # update current solution
                             # then prepare for next interation
@@ -226,7 +250,8 @@ class Tabu(Descent):
     # searching part
     # set K as 10/20/30/40/50, K is the search times
     def searching(self):
-        primer = Descent().improvement()
+        # primer = Descent().improvement()
+        primer = self.improvement()
         print("PRIMER:", primer)
         tr = primer[0]
         pv = primer[1]
@@ -244,7 +269,7 @@ class Tabu(Descent):
         is_moving = True # 当时写这个是干嘛？
         K = 10 # K can be 10/20/30/40/50
 
-        for count in range(K): # K is the biggest loop
+        for count in range(K): # K is the biggest loop INS-1
             # iter_inten = 0
             # if iter_inten <= pi:
                 # tabu_list = [] # 👀001 这里不应该放禁忌表吧，太外层了
@@ -259,8 +284,8 @@ class Tabu(Descent):
             # elif ch == 2: # choose tpt_neighbors
             #     self.tpt()
             i_factor = 0.01
-            self.opt1(tr, pv, main_tours, split_sub_tours, factor)
-            if i_factor == 0.1: # 这儿能接收到在变化的 i_factor 吗？
+            self.opt1(tr, pv, main_tours, split_sub_tours, i_factor)
+            if i_factor == 0.1: # 这儿能接收到在变化的 i_factor 吗？ INS-2
                 break
             
 
