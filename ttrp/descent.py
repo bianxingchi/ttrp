@@ -483,6 +483,6 @@ class Descent(Construction):
         
 if __name__ == "__main__":
     d = Descent()
-    print(d.improvement())
+    print("initial solution:", d.improvement())
 
             
