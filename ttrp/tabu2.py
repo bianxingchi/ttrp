@@ -117,7 +117,7 @@ class Tabu(Descent):
                     if theta_s <= penalty_s and ((penalty_r < theta_r) or (immediate_obj - best_obj <= factor * best_obj)):    
                         if (move not in tabu_list) and (immediate_obj < current_obj):
                             # tabu_list.append(cus, )
-
+                            print("Route_S matched:", route_s)
                             print("→ MOVE occured")
                             node_k = self.get_root(route_s, main_tours, split_sub_tours)
                             inx_l = self.route_inx(route_s, tr, pv, main_tours, split_sub_tours)
@@ -290,7 +290,10 @@ class Tabu(Descent):
         # primer = Descent().improvement()
         # primer = self.improvement()
         current_solution = self.improvement()
+        print("======="*10)
         print("PRIMER:", current_solution, "\n")
+        print()
+        print("↓"*20)
         # tr = primer[0]
         # pv = primer[1]
         # main_tours = primer[2]
@@ -534,7 +537,6 @@ class Tabu(Descent):
 if __name__ == "__main__":
     t = Tabu()
     print("\n")
-    print("↓"*20)
     print(t.searching())
 
 
