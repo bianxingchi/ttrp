@@ -81,9 +81,9 @@ class Tabu(Descent):
                 if cus in self.connectors(main_tours, split_sub_tours) or cus == 'a':
                     continue
                 pi = random.choice([5, 6, 7, 8, 9, 10]) # pi is the searching times
-                print("Route_R:", route_r)
+                # print("Route_R:", route_r)
                 print("Cus_i:", cus)
-                print("TR:", tr)
+                # print("TR:", tr)
                 penalty_r = max((self.penalty(route_r, tr, pv, main_tours, split_sub_tours) -
                                  self.one.get_demands()[cus]), 0)
                 theta_r = self.penalty(route_r, tr, pv, main_tours, split_sub_tours)
@@ -93,6 +93,8 @@ class Tabu(Descent):
                 if cus in self.connectors(main_tours, split_sub_tours) or cus == 'a':
                     continue
                 for route_s in b_tour:
+                    if route_s == route_r or ((self.one.get_types()[cus] == 1 and (route_s in pv or route_s in main_tours)) or route_s == []):
+                        continue
                     # for every customer only search pi times (the number of S is pi)
                     # pi 一定要满吗？还是说找到新解就结束当前遍历？
                     pi -= 1
@@ -155,16 +157,19 @@ class Tabu(Descent):
                             loops += 1
                             # break
                             print("CURRENT solution:", current_solution)
+                            print("Current length:", current_obj)
                             return current_solution, factor, loops, tabu_list
                           
                             # return tr, pv, main_tours, split_sub_tours, True
-                    elif n == len(a_tour):
-                        # print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
-                        # return tr, pv, main_tours, split_sub_tours, False
-                        # 这里应该是通用写法，而不是只按照 0.01 的方式更新。在 diver 阶段就变了
-                        # 这里的 i_factor 在最外部能否被接收，因为这里仍然处于最内的循环
-                        i_factor += 0.01
-                        return current_solution, factor, loops, tabu_list
+                        elif n == len(a_tour):
+                            # print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
+                            # return tr, pv, main_tours, split_sub_tours, False
+                            # 这里应该是通用写法，而不是只按照 0.01 的方式更新。在 diver 阶段就变了
+                            # 这里的 i_factor 在最外部能否被接收，因为这里仍然处于最内的循环
+                            factor += 0.01
+                            print("→ factor updated:", factor)
+                            print("None changed solution:", current_solution)
+                            return current_solution, factor, loops, tabu_list
 
 
                 '''    
@@ -292,6 +297,7 @@ class Tabu(Descent):
         current_solution = self.improvement()
         print("======="*10)
         print("PRIMER:", current_solution, "\n")
+        print("PRIMER's length:", self.solution_length(current_solution))
         print()
         print("↓"*20)
         # tr = primer[0]
@@ -314,7 +320,7 @@ class Tabu(Descent):
         # pi = random.choice([5, 6, 7, 8, 9, 10]) # pi is the searching times
         is_moving = True # 当时写这个是干嘛？
         loop_times = 0
-        K = 10 # K can be 10/20/30/40/50
+        K = 50 # K can be 10/20/30/40/50
         i_factor = 0.01
         tabu_list = [] # 👄004 哈哈，又是一个位置
         
@@ -343,9 +349,10 @@ class Tabu(Descent):
             loop_times = four_args[2]
             tabu_list = four_args[3]
             print("// OUTside current solution:", current_solution)
+            print("/// OUTside i_factor:", i_factor)
             print("-------"*10, "\n")
             # current_solution = self.opt1(i_factor, loop_times, primer)
-            if i_factor == 0.1: # 这儿能接收到在变化的 i_factor 吗？ INS-2
+            if i_factor > 0.1: # 这儿能接收到在变化的 i_factor 吗？ INS-2
                 break
         
         '''
