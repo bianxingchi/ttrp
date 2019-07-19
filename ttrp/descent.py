@@ -63,7 +63,9 @@ class Descent(Construction):
                 theta_r = self.penalty(route_r, tr, pv, main_tours, split_sub_tours)
                 for route_s in b_tour:
                     # print("S:", route_s)
-                    if route_s == route_r or (self.one.get_types()[cus] == 1 and (route_s in pv or route_s in main_tours)):
+                    if route_s == route_r:
+                        continue
+                    if (self.one.get_types()[cus] == 1) and ((route_s in pv) or (route_s in main_tours)):
                         continue
                     penalty_s = max((self.tour_demand(route_s) +
                                      self.one.get_demands()[cus] -
@@ -145,7 +147,9 @@ class Descent(Construction):
                 theta_r = self.penalty(route_r, tr, pv, main_tours, split_sub_tours)
                 for route_s in b_tour:
                     # print("try_subS:", route_s)
-                    if route_s == route_r or (self.one.get_types()[cus] == 1 and (route_s in pv or route_s in main_tours)):
+                    if route_s == route_r:
+                        continue
+                    if (self.one.get_types()[cus] == 1) and ((route_s in pv) or (route_s in main_tours)):
                         continue
                     penalty_s = max((self.tour_demand(route_s) +
                                      self.one.get_demands()[cus] - 
@@ -214,12 +218,12 @@ class Descent(Construction):
                 for route_s in b_tour:
                     if route_s == route_r:
                         continue
-                    elif (self.one.get_types()[cusi] == 1) and (route_s in (pv or main_tours)):
+                    if (self.one.get_types()[cusi] == 1) and ((route_s in pv) or (route_s in main_tours)):
                         continue
                     for cusj in route_s:
                         if cusj in self.connectors(main_tours, split_sub_tours) or cusj == 'a':
                             continue
-                        elif (self.one.get_types()[cusj] == 1) and (route_s in (pv or main_tours)):
+                        if (self.one.get_types()[cusj] == 1) and ((route_s in pv) or (route_s in main_tours)):
                             continue
                         penalty_r = max((self.tour_demand(route_r) +
                                      self.one.get_demands()[cusj] - 
@@ -427,8 +431,9 @@ class Descent(Construction):
             penalty = p1 + p2 + p3 + p4
             objective = l1 + l2 + l3 + l4
             print("after  looping:", tr, pv, main_tours, split_sub_tours, objective, penalty, '\n')
-            # if (step_one[-1] == False) and (step_two[-1] == False) and (step_three[-1] == False) and (step_four[-1] == False):
-            if penalty == 0.0:
+            if (step_one[-1] == False) and (step_two[-1] == False) and (step_three[-1] == False) and (step_four[-1] == False):
+            # if penalty == 0.0:
+                print("→ NO move occured")
                 is_moving = False
         initial_solution = [tr, pv, main_tours, split_sub_tours]
         return initial_solution
