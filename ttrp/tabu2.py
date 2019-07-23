@@ -161,15 +161,15 @@ class Tabu(Descent):
                             return current_solution, factor, loops, tabu_list
                           
                             # return tr, pv, main_tours, split_sub_tours, True
-                        elif n == len(a_tour):
-                            # print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
-                            # return tr, pv, main_tours, split_sub_tours, False
-                            # 这里应该是通用写法，而不是只按照 0.01 的方式更新。在 diver 阶段就变了
-                            # 这里的 i_factor 在最外部能否被接收，因为这里仍然处于最内的循环
-                            factor += 0.01
-                            print("→ factor updated:", factor)
-                            print("None changed solution:", current_solution)
-                            return current_solution, factor, loops, tabu_list
+                    elif n == len(a_tour):
+                        # print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
+                        # return tr, pv, main_tours, split_sub_tours, False
+                        # 这里应该是通用写法，而不是只按照 0.01 的方式更新。在 diver 阶段就变了
+                        # 这里的 i_factor 在最外部能否被接收，因为这里仍然处于最内的循环
+                        factor += 0.01
+                        print("→ factor updated:", factor)
+                        print("No changed solution:", current_solution)
+                        return current_solution, factor, loops, tabu_list
 
 
                 '''    
@@ -354,6 +354,16 @@ class Tabu(Descent):
             # current_solution = self.opt1(i_factor, loop_times, primer)
             if i_factor > 0.1: # 这儿能接收到在变化的 i_factor 吗？ INS-2
                 break
+
+        if loop_times > 0:
+            self.inner_improve(current_solution[0], current_solution[1], current_solution[2], current_solution[3])
+            then
+            2-opt & check GLS
+
+        diversification:
+            the only difference is d_factor
+            BUT how to restart from intensification
+            或许分化的和强化的要写在两个函数里
         
         '''
         while loop_times < K:

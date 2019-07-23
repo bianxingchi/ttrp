@@ -11,6 +11,7 @@ class Model:
         self.M = cplex.Cplex()
         self.M.objective.set_sense(self.M.objective.sense.minimize)
 
+        # 这儿是随机选取的指派问题结果的第一组值
         self.my_obj = self.A.costs_all()[0]
         # print(my_obj)
         self.my_rhs = [1.0] * self.A.one.customer_num + [self.A.one.truck_cap + self.A.one.trailer_cap] * self.A.trailer_num + [self.A.one.truck_cap] * (self.A.truck_num - self.A.trailer_num)

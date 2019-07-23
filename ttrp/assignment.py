@@ -109,6 +109,7 @@ class Assignment:
             costs_all.append(costs)
             # print("应该是十组之一", len(costs)) # 长度为（剔除了路线点）客户数
         # print(len(costs_all)) # 10组
+        # 哪一组是最好的呢？
         return costs_all
 
 if __name__ == "__main__":
