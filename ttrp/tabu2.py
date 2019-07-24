@@ -47,7 +47,7 @@ class Tabu(Descent):
     # one-point tabu search improvement
     # non-sub-tours part
     # def opt1(self, tr, pv, main_tours, split_sub_tours, factor, input_solution):
-    def opt1(self, factor, loops, input_solution, tabu_list):
+    def opt1(self, factor, loops, input_solution, tabu_list, search_type):
         current_solution = input_solution # primer as initial solution
         current_obj = self.solution_length(input_solution)
         best_obj = self.solution_length(input_solution) # a solution's length not a route
@@ -166,10 +166,17 @@ class Tabu(Descent):
                         # return tr, pv, main_tours, split_sub_tours, False
                         # 这里应该是通用写法，而不是只按照 0.01 的方式更新。在 diver 阶段就变了
                         # 这里的 i_factor 在最外部能否被接收，因为这里仍然处于最内的循环
-                        factor += 0.01
-                        print("→ factor updated:", factor)
-                        print("No changed solution:", current_solution)
-                        return current_solution, factor, loops, tabu_list
+                        # 0 means intensification; 1 means diversification
+                        if search_type == 0:
+                            factor += 0.01
+                            print("→ factor updated:", factor)
+                            print("No changed solution:", current_solution)
+                            return current_solution, factor, loops, tabu_list
+                        elif search_type == 1:
+                            factor += 0.05
+                            print("→ factor updated:", factor)
+                            print("No changed solution:", current_solution)
+                            return current_solution, factor, loops, tabu_list
 
 
                 '''    
@@ -343,7 +350,7 @@ class Tabu(Descent):
             # print("TR-算子前：", tr)
             # self.opt1(tr, pv, main_tours, split_sub_tours, i_factor, primer)
             # self.opt1(i_factor, loop_times, current_solution, tabu_list)
-            four_args = self.opt1(i_factor, loop_times, current_solution, tabu_list)
+            four_args = self.opt1(i_factor, loop_times, current_solution, tabu_list, 0)
             current_solution = four_args[0]
             i_factor = four_args[1]
             loop_times = four_args[2]
@@ -355,16 +362,47 @@ class Tabu(Descent):
             if i_factor > 0.1: # 这儿能接收到在变化的 i_factor 吗？ INS-2
                 break
 
+        # loop_times == 0 means no move accured at intensification stage
         if loop_times > 0:
-            self.inner_improve(current_solution[0], current_solution[1], current_solution[2], current_solution[3])
-            then
-            2-opt & check GLS
+            # do descent & 2-opt, then check GLS
+            improved_solution = self.inner_improve(current_solution[0], current_solution[1], current_solution[2], current_solution[3])
+            if GLS satisfied:
+                return final_solution # searching function stop here
 
-        diversification:
-            the only difference is d_factor
-            BUT how to restart from intensification
-            或许分化的和强化的要写在两个函数里
-        
+        loop2_times = 0
+        d_factor = 0.1
+        tabu_list2 = [] # 👄004 哈哈，又是一个位置
+        while loop2_times < K: # K is the biggest loop INS-1
+            # iter_inten = 0
+            # if iter_inten <= pi:
+                # tabu_list = [] # 👀001 这里不应该放禁忌表吧，太外层了
+                # choose one of the movement strategy
+            
+            # ch = random.choice([1, 2])
+            # if ch == 1: # use opt
+            #     # ??? this one first
+            #     self.opt1(tr, pv, main_tours, split_sub_tours, factor, pi)
+            #     # then sub_tour part???
+            #     self.opt2()
+            # elif ch == 2: # choose tpt_neighbors
+            #     self.tpt()
+            print("LOOP2 times:", loop2_times)
+            
+            # print("TR-算子前：", tr)
+            # self.opt1(tr, pv, main_tours, split_sub_tours, d_factor, primer)
+            # self.opt1(d_factor, loop2_times, current_solution, tabu_list)
+            four_args = self.opt1(d_factor, loop2_times, current_solution, tabu_list, 1)
+            current_solution = four_args[0]
+            d_factor = four_args[1]
+            loop2_times = four_args[2]
+            tabu_list = four_args[3]
+            print("// OUTside current solution:", current_solution)
+            print("/// OUTside d_factor:", d_factor)
+            print("-------"*10, "\n")
+            # current_solution = self.opt1(d_factor, loop2_times, primer)
+            if d_factor > 0.1: # 这儿能接收到在变化的 d_factor 吗？ INS-2
+                break
+
         '''
         while loop_times < K:
             # choose three movements randomly

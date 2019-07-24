@@ -77,8 +77,11 @@ class Construction:
         # fuck = len(current_tour)
         # current_tour = self.get_tours()[0]
         # for tour in self.get_tours():
+        # only 2 point, do nothing
         if len(current_tour) == 2:
             return current_tour
+        # a route only one point, it means:
+        # tr\pv\main_tours only have 'a'; sub-tours only have root
         elif len(current_tour) == 1:
             return []
         starter = random.choice(current_tour)

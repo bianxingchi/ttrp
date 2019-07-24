@@ -41,6 +41,12 @@ class Descent(Construction):
         cs = self.cheapest_insertion(temp_s)
         return cr, cs 
 
+    def remove_empty(self, routes):
+        for route in routes:
+            if route == []:
+                routes.remove(route)
+        return routes
+    
     # a_tour is examined 1st
     def opd1(self, tr, pv, main_tours, split_sub_tours):
         tr_len = len(tr)
@@ -90,6 +96,7 @@ class Descent(Construction):
                     # if (new_theta_s <= theta_s) and ((new_theta_r < theta_r) or (cost_of_move < 0)):
                     # if (penalty_new_s <= penalty_s) and ((penalty_new_r < penalty_r) or (cost_of_move < 0)):
                     # if (penalty_s <= theta_s) and ((penalty_r < theta_r) or (cost_of_move < 0)):
+                        print("→ S Matched (opd1):", cus, route_s)
                         for n, i in enumerate(b_tour):
                             if i == route_r:
                                 b_tour[n] = move[0]
@@ -112,6 +119,11 @@ class Descent(Construction):
                             split_sub_tours = []
                         else:
                             split_sub_tours = b_tour[tr_len + pv_len + mt_len:]
+                        # remove empty list from a type of routes
+                        tr = self.remove_empty(tr)
+                        pv = self.remove_empty(pv)
+                        main_tours = self.remove_empty(main_tours)
+                        split_sub_tours = self.remove_empty(split_sub_tours)
                         return tr, pv, main_tours, split_sub_tours, True
                     elif n == len(a_tour):
                         # print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
@@ -179,6 +191,7 @@ class Descent(Construction):
                     if (penalty_s <= theta_s) and ((penalty_r < theta_r) or (cost_of_move < 0)):
                     # if (penalty_new_s <= penalty_s) and ((penalty_new_r < penalty_r) or (cost_of_move < 0)):
                     # if (penalty_s <= theta_s) and ((penalty_r < theta_r) or (cost_of_move < 0)):
+                        print("→ S Matched (opd2):", cus, route_s)
                         for n, i in enumerate(b_tour):
                             if i == route_r:
                                 b_tour[n] = move[0]
@@ -201,6 +214,11 @@ class Descent(Construction):
                             split_sub_tours = []
                         else:
                             split_sub_tours = b_tour[tr_len + pv_len + mt_len:]
+                        # remove empty list from a type of routes
+                        # tr = self.remove_empty(tr)
+                        # pv = self.remove_empty(pv)
+                        # main_tours = self.remove_empty(main_tours)
+                        # split_sub_tours = self.remove_empty(split_sub_tours)
                         return tr, pv, main_tours, split_sub_tours, True
                     elif n == len(split_sub_tours):
                         # print("end2 is {end} n is {nn}".format(end = len(split_sub_tours), nn = n))
@@ -280,6 +298,7 @@ class Descent(Construction):
                         # 这儿看起来有点混乱，但其实逻辑没错
                         # 问题在于这种 and 和 or 的组合，是不是就正确还原了预想的逻辑
                         if ((penalty_r <= theta_r) and (penalty_s <= theta_s)) and ((penalty_r < theta_r) or (penalty_s < theta_s) or cost_of_exchange < 0):
+                            print("→ S Matched (tpd):", cusi, route_s, "|", cusj, route_r)
                             for n, i in enumerate(b_tour):
                                 if i == route_r:
                                     b_tour[n] = move2[1]
@@ -302,6 +321,11 @@ class Descent(Construction):
                                 split_sub_tours = []
                             else:
                                 split_sub_tours = b_tour[tr_len + pv_len + mt_len:]
+                            # remove empty list from a type of routes
+                            tr = self.remove_empty(tr)
+                            pv = self.remove_empty(pv)
+                            main_tours = self.remove_empty(main_tours)
+                            split_sub_tours = self.remove_empty(split_sub_tours)
                             return tr, pv, main_tours, split_sub_tours, True
                         elif n == len(b_tour):
                             # print("end3 is {end} n is {nn}".format(end = len(b_tour), nn = n))
@@ -363,6 +387,7 @@ class Descent(Construction):
                     new_length = self.tour_length(sub_tour)
                     # print("new_length:", new_length)
                     if new_length < length:
+                        print("→ Root changed (strr):", node)
                         for n, i in enumerate(split_sub_tours):
                             if i == route:
                                 split_sub_tours[n] = sub_tour
@@ -379,9 +404,13 @@ class Descent(Construction):
         improved = True
         while improved:
             improved = False
-            for i in range(len(route) - 1):
+            for i in range(len(route) - 2):
                 for j in range(i + 1, len(route)):
-                    new_route = route[:i + 1] + list(reversed(route[i:j + 1])) + route[j + 1:]
+                    if j - 1 == 1:
+                        continue
+                    new_route = route[:i] + list(reversed(route[i:j + 1])) + route[j + 1:]
+                    # new_route = route[:]
+                    # new_route[i:j] = route[j-1:i-1:-1]
                     if self.tour_length(new_route) < self.tour_length(route):
                         best = new_route
                         improved = True
@@ -515,11 +544,37 @@ class Descent(Construction):
             objective = l1 + l2 + l3 + l4
             print("after  looping:", tr, pv, main_tours, split_sub_tours, objective, penalty, '\n')
             if (step_one[-1] == False) and (step_two[-1] == False) and (step_three[-1] == False) and (step_four[-1] == False):
+            # if (step_one[-1] == False) and (step_two[-1] == False):
             # if penalty == 0.0:
-                print("→ NO move occured")
+                print("→ NO move occured & apply 2-opt")
+                new_tr, new_pv, new_mts, new_ssts = [], [], [], []
+                if tr == []:
+                    pass
+                else:
+                    for route in tr:
+                        new_route = self.two_opt(route)
+                        new_tr.append(new_route)
+                if pv == []:
+                    pass
+                else:
+                    for route in pv:
+                        new_route = self.two_opt(route)
+                        new_pv.append(new_route)
+                if main_tours == []:
+                    pass
+                else:
+                    for route in main_tours:
+                        new_route = self.two_opt(route)
+                        new_mts.append(new_route)
+                if split_sub_tours == []:
+                    pass
+                else:
+                    for route in split_sub_tours:
+                        new_route = self.two_opt(route)
+                        new_ssts.append(new_route)
                 is_moving = False
-        initial_solution = [tr, pv, main_tours, split_sub_tours]
-        return initial_solution   
+        improved_solution = [new_tr, new_pv, new_mts, new_ssts]
+        return improved_solution   
         
 if __name__ == "__main__":
     d = Descent()
