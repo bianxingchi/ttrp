@@ -13,10 +13,12 @@ import random
 class Construction:
     def __init__(self):
         self.AM = Model().solve() # return the values of the model, list
-        self.one = ReadData("TTRP_01.txt")
+        self.one = ReadData("TTRP_20.txt")
         self.truck_num = 5
         self.trailer_num = 3
-        self.all_locations = [['a', ['30.0', '40.0']]] + self.one.get_locations()
+        # different TTRP_xx.txt need different argument
+        # self.all_locations = [['a', ['30.0', '40.0']]] + self.one.get_locations() # 01.txt
+        self.all_locations = [['a', ['30.0', '40.0']]] + self.one.get_locations() # 02.txt
 
     # compute the distance of two nodes
     def compute_dist(self, i, j):
@@ -192,6 +194,26 @@ class Construction:
             complete_tours.append(self.complete_tour(ms))
         return  complete_tours
 
+    def total_length(self):
+        length = 0.0
+        for route in self.pure_truck():
+            length += self.tour_length(route)
+        for route in self.pure_vehicle():
+            length += self.tour_length(route)
+        cv = self.all_complete_tour()
+        main_tours, sub_tours = [], []
+        for seqs in cv:
+            main_tours.append(seqs[0])
+            sub_tours.append(seqs[1]) # this will be a list of list of list
+        split_sub_tours = []
+        for tour in sub_tours:
+            split_sub_tours += tour
+        for route in main_tours:
+            length += self.tour_length(route)
+        for route in split_sub_tours:
+            length += self.tour_length(route)
+        return length
+
     '''
     def connectors(self):
         connectors = []
@@ -211,8 +233,10 @@ if __name__ == "__main__":
     c = Construction()
     # print(c.all_route())
     # print(c.tour_length())
+    print(c.get_tours(), "\n")
     print(c.pure_truck(), "\n")
     print(c.pure_vehicle(), "\n")
-    print(c.all_complete_tour())
+    print(c.all_complete_tour(), "\n")
+    print(c.total_length())
     # print(len(c.all_complete_tour()), "\n")
     # print(c.connectors())

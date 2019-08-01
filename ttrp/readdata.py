@@ -51,9 +51,10 @@ class ReadData:
         
 
 if __name__ == "__main__":
-    a = ReadData("TTRP_01.txt")
+    a = ReadData("TTRP_02.txt")
     print(a.get_demands(), '\n')
     print(a.get_types(), '\n')
     print(a.get_locations(), '\n')
     print(float(a.fs[3].split()[3]))
+    print(len(a.fs))
 

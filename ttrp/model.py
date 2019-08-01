@@ -102,5 +102,6 @@ class Model:
 
 if __name__ == "__main__":
     m = Model()
-    print(len(m.solve()))
-    print(m.solve())
+    mv = m.solve()
+    print(mv, "\n")
+    print(len(mv))
