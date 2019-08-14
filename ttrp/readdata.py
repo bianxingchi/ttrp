@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-# 方案一：直接写业务代码读取所需数据
-# 方案二：将 txt 转换为 csv 之类的文件类型，通过 pandas 来读取
-# 这儿要不要 class 一下，把那些获得的数据也写成函数？
-
-# import sys
-
 class ReadData:
     def __init__(self, filename):
         # self.filename = filename

@@ -6,7 +6,7 @@ from math import hypot
 
 class Assignment:
     def __init__(self):
-        self.one = ReadData("TTRP_20.txt")
+        self.one = ReadData("TTRP_01.txt")
         self.truck_num = 5
         self.trailer_num = 3
 

@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-# 这一步利用启发式算法生成路径，complete 路径的稍复杂些
-# 或许要画个图出来
-
 from readdata import ReadData
 from model import Model
 from math import hypot, ceil
@@ -13,7 +10,7 @@ import random
 class Construction:
     def __init__(self):
         self.AM = Model().solve() # return the values of the model, list
-        self.one = ReadData("TTRP_20.txt")
+        self.one = ReadData("TTRP_01.txt")
         self.truck_num = 5
         self.trailer_num = 3
         # different TTRP_xx.txt need different argument
@@ -213,18 +210,6 @@ class Construction:
         for route in split_sub_tours:
             length += self.tour_length(route)
         return length
-
-    '''
-    def connectors(self):
-        connectors = []
-        for seqs in self.all_complete_tour():
-            for cusi in seqs[0]:
-                # sub-tour is a list of all sub-tours
-                for single_tour in seqs[1]:
-                    if cusi in single_tour:
-                        connectors.append(cusi)
-        return connectors
-    '''
 
     def all_route(self):
         return self.pure_truck(), self.pure_vehicle(), self.all_complete_tour()
