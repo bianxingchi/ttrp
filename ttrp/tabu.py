@@ -63,19 +63,34 @@ class Tabu(Descent):
         b_tour = tr + pv + main_tours + split_sub_tours
         # tabu_list = tabu # 👀003√ 唉，这已经是第三个可能的地方了
 
-        n = 0 # max n is len(a_tour)
+        n = 0 # count customer visited
         for route_r in a_tour:
-            n += 1
             # print("len(a_tour) & n:", len(a_tour), n)
             r_obj = self.tour_length(route_r) # for comparation
             # tabu_list = [] # 👀002√ 对一个 route_r 来说，存储已经发生过的移动 (i,k,l)
             list_size = 5 # assign diffrtent number to size
             found = False # 如果在 INS 达到时，还没发现新解，就要更新 i_factor
             for cus in route_r:
+                n += 1
+                print("Cus_i (tabu.opt1):", cus)
                 if cus in self.connectors(main_tours, split_sub_tours) or cus == 'a':
-                    continue
+                    print("{} skiped".format(cus))
+                    if n == sum([len(x) for x in a_tour]):
+                        if search_type == 0:
+                            print("↘ snap 010")
+                            factor += 0.01
+                            print("→ i_factor updated:", factor)
+                            print("No changed solution:", current_solution)
+                            return current_solution, factor, loops, tabu_list
+                        elif search_type == 1:
+                            print("↘ snap 011")
+                            factor += 0.05
+                            print("→ d_factor updated:", factor)
+                            print("No changed solution:", current_solution)
+                            return current_solution, factor, loops, tabu_list
+                    else:
+                        continue
                 # print("Route_R:", route_r)
-                print("Cus_i:", cus)
                 # print("TR:", tr)
                 penalty_r = max((self.penalty(route_r, tr, pv, main_tours, split_sub_tours) -
                                  self.one.get_demands()[cus]), 0)
@@ -84,32 +99,42 @@ class Tabu(Descent):
                 # neighbors = self.opt_neighbors(cus, route_r, tr, pv, main_tours, split_sub_tours) # 本想用这种写法的
                 neighborhood = []
                 if cus in self.connectors(main_tours, split_sub_tours) or cus == 'a':
+                    print("{} skiped".format(cus))
                     continue
                 pi = random.choice([5, 6, 7, 8, 9, 10]) # pi is the searching times
+                if pi > len(b_tour):
+                    pi = len(b_tour)
                 # print("↘B_tour:", b_tour)
+                print("PI initial:", pi)
                 for route_s in b_tour:
                     pi -= 1
-                    if route_s == route_r or ((self.one.get_types()[cus] == 1 and (route_s in pv or route_s in main_tours)) or route_s == []):
-                        continue
+                    print("Route_S:", route_s)
                     # for every customer only search pi times (the number of S is pi)
                     # pi 一定要满吗？还是说找到新解就结束当前遍历？
                     # pi -= 1
                     # print("route_s have searched {time} times".format(time = pi))
-                    if pi < 0 and n == len(a_tour):
-                        print("ViSiTeD AlL CuStOmEr")
+                    if pi < 0 and n == sum([len(x) for x in a_tour]):
+                        print("↘ ViSiTeD AlL CuStOmEr (in b_tour)")
                         if search_type == 0:
+                            print("THIS is intensification stage")
                             factor += 0.01
                             print("→ i_factor updated:", factor)
                             print("No changed solution:", current_solution)
                             return current_solution, factor, loops, tabu_list
                         elif search_type == 1:
+                            print("THIS is diversification stage")
                             factor += 0.05
                             print("→ d_factor updated:", factor)
                             print("No changed solution:", current_solution)
                             return current_solution, factor, loops, tabu_list
                     elif pi < 0:
-                        # print("→→ route_s searched PI times")
+                        print("↘ route_s searched PI times")
                         break # stop current iteration and return to another cus
+
+                    if route_s == route_r or ((self.one.get_types()[cus] == 1 and (route_s in pv or route_s in main_tours)) or route_s == []):
+                        print("routeS {} skiped".format(route_s))
+                        print(pi, n, sum([len(x) for x in a_tour]))
+                        continue
                     if route_s == route_r or (self.one.get_types()[cus] == 1 & (route_s in pv or route_s in main_tours)):
                         # print("↘001")
                         continue
@@ -129,8 +154,9 @@ class Tabu(Descent):
                     # if theta_s <= penalty_s and ((penalty_r < theta_r) or (otb is False)):
                     # print("↘GAP of best:", immediate_obj - best_obj)
                     # print("↘GAP of factor:", factor * best_obj)
+                    # ===========================================================
                     if theta_s <= penalty_s and ((penalty_r < theta_r) or (immediate_obj - best_obj <= factor * best_obj)):    
-                        # print("↘002")
+                        print("↘002")
                         if (move not in tabu_list) and (immediate_obj < current_obj):
                             # tabu_list.append(cus, )
                             print("Route_S matched:", route_s)
@@ -177,8 +203,8 @@ class Tabu(Descent):
                             return current_solution, factor, loops, tabu_list
                           
                             # return tr, pv, main_tours, split_sub_tours, True
-                    elif n == len(a_tour):
-                        print("ViSiTeD AlL CuStOmEr")
+                    elif n == sum([len(x) for x in a_tour]):
+                        print("↘ ViSiTeD AlL CuStOmEr")
                         # print("end1 is {end} n is {nn}".format(end = len(a_tour), nn = n))
                         # return tr, pv, main_tours, split_sub_tours, False
                         # 这里应该是通用写法，而不是只按照 0.01 的方式更新。在 diver 阶段就变了

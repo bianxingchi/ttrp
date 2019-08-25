@@ -258,6 +258,7 @@ class Descent(Construction):
                         
                         # 这儿看起来有点混乱，但其实逻辑没错
                         # 问题在于这种 and 和 or 的组合，是不是就正确还原了预想的逻辑
+                        # ===========================================================
                         if ((penalty_r <= theta_r) and (penalty_s <= theta_s)) and ((penalty_r < theta_r) or (penalty_s < theta_s) or cost_of_exchange < 0):
                             print("→ S Matched (tpd):", cusi, route_s, "|", cusj, route_r)
                             for n, i in enumerate(b_tour):
