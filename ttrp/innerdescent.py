@@ -6,7 +6,7 @@ from construction import Construction
 from copy import deepcopy
 import random
 
-class Descent(Construction):
+class Innerdescent(Construction):
     def tour_demand(self, tour):
         demands = 0.0
         for cus in tour:
@@ -86,7 +86,7 @@ class Descent(Construction):
                     move = self.move(temp_r, temp_s, cus)
                     cost_of_move = self.tour_length(move[0]) + self.tour_length(move[1]) - self.tour_length(route_r) - self.tour_length(route_s)
                     # ===========================================================
-                    if (penalty_s <= theta_s) and ((penalty_r < theta_r) or (cost_of_move < 0)):
+                    if penalty_s <= 0 and penalty_r <= 0 and cost_of_move < 0:
                         print("→ S Matched (opd1):", cus, route_s)
                         for n, i in enumerate(b_tour):
                             if i == route_r:
@@ -171,7 +171,8 @@ class Descent(Construction):
                     move = self.move(temp_r, temp_s, cus)
                     # print("opd2 after move:", move)
                     cost_of_move = self.tour_length(move[0]) + self.tour_length(move[1]) - self.tour_length(route_r) - self.tour_length(route_s)
-                    if (penalty_s <= theta_s) and ((penalty_r < theta_r) or (cost_of_move < 0)):
+                    # ===========================================================
+                    if penalty_s <= 0 and penalty_r <= 0 and cost_of_move < 0:
                         print("→ S Matched (opd2):", cus, route_s)
                         for n, i in enumerate(b_tour):
                             if i == route_r:
@@ -260,7 +261,7 @@ class Descent(Construction):
                         # 这儿看起来有点混乱，但其实逻辑没错
                         # 问题在于这种 and 和 or 的组合，是不是就正确还原了预想的逻辑
                         # ===========================================================
-                        if ((penalty_r <= theta_r) and (penalty_s <= theta_s)) and ((penalty_r < theta_r) or (penalty_s < theta_s) or cost_of_exchange < 0):
+                        if penalty_r <= 0 and penalty_s <= 0 and cost_of_exchange < 0:
                             print("→ S Matched (tpd):", cusi, route_s, "|", cusj, route_r)
                             for n, i in enumerate(b_tour):
                                 if i == route_r:
@@ -379,101 +380,20 @@ class Descent(Construction):
                         improved = True
             route = best
         return best
-            
-    # descent
-    def improvement(self):
-        # variables to guarantee do not call
-        # cheapest insertion function secondly
-        tr = self.pure_truck()
-        pv = self.pure_vehicle()
-        cv = self.all_complete_tour()
-        main_tours, sub_tours = [], []
-        for seqs in cv:
-            main_tours.append(seqs[0])
-            sub_tours.append(seqs[1]) # this will be a list of list of list
-        split_sub_tours = []
-        for tour in sub_tours:
-            split_sub_tours += tour
 
-        is_moving = True
-        while is_moving:
-            print("Before descent:", tr, pv, main_tours, split_sub_tours)
-            step_one = self.opd1(tr, pv, main_tours, split_sub_tours)
-            # print("After 1:", step_one)
-            step_two = self.opd2(step_one[0], step_one[1], step_one[2], step_one[3])
-            # print("After 2:", step_two)
-            step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
-            # print("After 3:", step_three)
-            step_four = self.strr(step_three[2], step_three[3])
-            # print("After 4:", step_four)
-            tr, pv, main_tours, split_sub_tours = step_three[0], step_three[1], step_three[2], step_four[0]
-            
-            # tr, pv, main_tours, split_sub_tours = step_three[0], step_three[1], step_three[2], step_three[3]
-            # print("objective:", self.tour_length(tr) + self.tour_length(pv) + self.tour_length(main_tours) + self.tour_length(split_sub_tours), "\n")
-            p1, p2, p3, p4 = 0.0, 0.0, 0.0, 0.0
-            l1, l2, l3, l4 = 0.0, 0.0, 0.0, 0.0
-            for i in tr:
-                p1 += self.penalty(i, tr, pv, main_tours, split_sub_tours)
-                l1 += self.tour_length(i)
-            for i in pv:
-                p2 += self.penalty(i, tr, pv, main_tours, split_sub_tours)
-                l2 += self.tour_length(i)
-            for i in main_tours:
-                p3 += self.penalty(i, tr, pv, main_tours, split_sub_tours)
-                l3 += self.tour_length(i)
-            for i in split_sub_tours:
-                p4 += self.penalty(i, tr, pv, main_tours, split_sub_tours)
-                l4 += self.tour_length(i)
-            penalty = p1 + p2 + p3 + p4
-            objective = l1 + l2 + l3 + l4
-            print("After  descent:", tr, pv, main_tours, split_sub_tours, objective, penalty, '\n')
-            if (step_one[-1] == False) and (step_two[-1] == False) and (step_three[-1] == False) and (step_four[-1] == False):
-            # if (step_one[-1] == False) and (step_two[-1] == False):
-            # if penalty == 0.0:
-                print("→ DESCENT stage: NO move occured & apply 2-opt")
-                new_tr, new_pv, new_mts, new_ssts = [], [], [], []
-                if tr == []:
-                    pass
-                else:
-                    for route in tr:
-                        new_route = self.two_opt(route)
-                        new_tr.append(new_route)
-                if pv == []:
-                    pass
-                else:
-                    for route in pv:
-                        new_route = self.two_opt(route)
-                        new_pv.append(new_route)
-                if main_tours == []:
-                    pass
-                else:
-                    for route in main_tours:
-                        new_route = self.two_opt(route)
-                        new_mts.append(new_route)
-                if split_sub_tours == []:
-                    pass
-                else:
-                    for route in split_sub_tours:
-                        new_route = self.two_opt(route)
-                        new_ssts.append(new_route)
-                is_moving = False
-        initial_solution = [new_tr, new_pv, new_mts, new_ssts]
-        return initial_solution
-
-    '''    
     # descent used within tabu search
     def inner_improve(self, tr, pv, main_tours, split_sub_tours):
         is_moving = True
         while is_moving:
             print("before inner descent:", tr, pv, main_tours, split_sub_tours)
             step_one = self.opd1(tr, pv, main_tours, split_sub_tours)
-            print("after 1:", step_one)
+            # print("after 1:", step_one)
             step_two = self.opd2(step_one[0], step_one[1], step_one[2], step_one[3])
-            print("after 2:", step_two)
+            # print("after 2:", step_two)
             step_three = self.tpd(step_two[0], step_two[1], step_two[2], step_two[3])
-            print("after 3:", step_three)
+            # print("after 3:", step_three)
             step_four = self.strr(step_three[2], step_three[3])
-            print("after 4:", step_four)
+            # print("after 4:", step_four)
             tr, pv, main_tours, split_sub_tours = step_three[0], step_three[1], step_three[2], step_four[0]
             # print("objective:", self.tour_length(tr) + self.tour_length(pv) + self.tour_length(main_tours) + self.tour_length(split_sub_tours), "\n")
             p1, p2, p3, p4 = 0.0, 0.0, 0.0, 0.0
@@ -524,11 +444,10 @@ class Descent(Construction):
                         new_ssts.append(new_route)
                 is_moving = False
         improved_solution = [new_tr, new_pv, new_mts, new_ssts]
-        return improved_solution   
-    '''
-
+        return improved_solution
+        
 if __name__ == "__main__":
-    d = Descent()
-    print("initial solution:", d.improvement())
+    d = Innerdescent()
+    print("inner descent solution:", d.inner_improve())
 
             
